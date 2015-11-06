@@ -1,0 +1,391 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:special
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:matts_components
+LIBS:uln-udn
+LIBS:arduino
+LIBS:w_connectors
+LIBS:freetronics_schematic
+LIBS:SolarBirdsongShield_v1-cache
+EELAYER 27 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "Stepper Motor Controller"
+Date "13 jul 2015"
+Rev "2"
+Comp "Jo Fairfax Studio"
+Comment1 "Version 2"
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L CP1 C3
+U 1 1 551B33BA
+P 3950 3700
+F 0 "C3" H 4000 3800 50  0000 L CNN
+F 1 "100u" H 4000 3600 50  0000 L CNN
+F 2 "~" H 3950 3700 60  0000 C CNN
+F 3 "~" H 3950 3700 60  0000 C CNN
+	1    3950 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L ARDUINO_SHIELD SHIELD?
+U 1 1 55A4086C
+P 5550 3650
+F 0 "SHIELD?" H 5100 4800 60  0000 C CNN
+F 1 "ARDUINO_SHIELD" H 5600 2700 60  0000 C CNN
+F 2 "FT:ARDUINO_SHIELD" H 5550 3450 50  0001 C CNN
+F 3 "" H 5550 3650 60  0000 C CNN
+	1    5550 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_3 K?
+U 1 1 55A40899
+P 1000 1300
+F 0 "K?" V 950 1300 50  0000 C CNN
+F 1 "PIR" V 1050 1300 40  0000 C CNN
+F 2 "" H 1000 1300 60  0000 C CNN
+F 3 "" H 1000 1300 60  0000 C CNN
+	1    1000 1300
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R?
+U 1 1 55A408AD
+P 1300 3650
+F 0 "R?" V 1380 3650 40  0000 C CNN
+F 1 "10k" V 1307 3651 40  0000 C CNN
+F 2 "~" V 1230 3650 30  0000 C CNN
+F 3 "~" H 1300 3650 30  0000 C CNN
+	1    1300 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 55A408CB
+P 1300 3000
+F 0 "R?" V 1380 3000 40  0000 C CNN
+F 1 "LDR" V 1307 3001 40  0000 C CNN
+F 2 "~" V 1230 3000 30  0000 C CNN
+F 3 "~" H 1300 3000 30  0000 C CNN
+	1    1300 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L C C?
+U 1 1 55A408DA
+P 1600 3650
+F 0 "C?" H 1600 3750 40  0000 L CNN
+F 1 "100n" H 1606 3565 40  0000 L CNN
+F 2 "~" H 1638 3500 30  0000 C CNN
+F 3 "~" H 1600 3650 60  0000 C CNN
+	1    1600 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L NPN Q?
+U 1 1 55A40ADD
+P 8250 4900
+F 0 "Q?" H 8250 4750 50  0000 R CNN
+F 1 "NPN" H 8250 5050 50  0000 R CNN
+F 2 "~" H 8250 4900 60  0000 C CNN
+F 3 "~" H 8250 4900 60  0000 C CNN
+	1    8250 4900
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R?
+U 1 1 55A40AEC
+P 7500 4900
+F 0 "R?" V 7580 4900 40  0000 C CNN
+F 1 "1k" V 7507 4901 40  0000 C CNN
+F 2 "~" V 7430 4900 30  0000 C CNN
+F 3 "~" H 7500 4900 30  0000 C CNN
+	1    7500 4900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L R R?
+U 1 1 55A40AFB
+P 7900 5250
+F 0 "R?" V 7980 5250 40  0000 C CNN
+F 1 "100k" V 7907 5251 40  0000 C CNN
+F 2 "~" V 7830 5250 30  0000 C CNN
+F 3 "~" H 7900 5250 30  0000 C CNN
+	1    7900 5250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8050 4900 7750 4900
+Wire Wire Line
+	7900 5000 7900 4900
+Connection ~ 7900 4900
+Wire Wire Line
+	7900 5500 7900 5650
+Wire Wire Line
+	7900 5650 8350 5650
+Wire Wire Line
+	8350 5650 8350 5100
+$Comp
+L GND #PWR?
+U 1 1 55A40D42
+P 8100 5750
+F 0 "#PWR?" H 8100 5750 30  0001 C CNN
+F 1 "GND" H 8100 5680 30  0001 C CNN
+F 2 "" H 8100 5750 60  0000 C CNN
+F 3 "" H 8100 5750 60  0000 C CNN
+	1    8100 5750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8100 5750 8100 5650
+Connection ~ 8100 5650
+$Comp
+L +BATT #PWR?
+U 1 1 55A40E0F
+P 4200 3400
+F 0 "#PWR?" H 4200 3350 20  0001 C CNN
+F 1 "+BATT" H 4200 3500 30  0000 C CNN
+F 2 "" H 4200 3400 60  0000 C CNN
+F 3 "" H 4200 3400 60  0000 C CNN
+	1    4200 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 55A40E28
+P 4200 4000
+F 0 "#PWR?" H 4200 4000 30  0001 C CNN
+F 1 "GND" H 4200 3930 30  0001 C CNN
+F 2 "" H 4200 4000 60  0000 C CNN
+F 3 "" H 4200 4000 60  0000 C CNN
+	1    4200 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L C C?
+U 1 1 55A417F8
+P 3650 3700
+F 0 "C?" H 3650 3800 40  0000 L CNN
+F 1 "100n" H 3656 3615 40  0000 L CNN
+F 2 "~" H 3688 3550 30  0000 C CNN
+F 3 "~" H 3650 3700 60  0000 C CNN
+	1    3650 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L +BATT #PWR?
+U 1 1 55A41814
+P 8350 2550
+F 0 "#PWR?" H 8350 2500 20  0001 C CNN
+F 1 "+BATT" H 8350 2650 30  0000 C CNN
+F 2 "" H 8350 2550 60  0000 C CNN
+F 3 "" H 8350 2550 60  0000 C CNN
+	1    8350 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3650 3500 3650 3450
+Wire Wire Line
+	3650 3450 4600 3450
+Wire Wire Line
+	4200 3400 4200 3450
+Connection ~ 4200 3450
+Wire Wire Line
+	3950 3500 3950 3450
+Connection ~ 3950 3450
+Wire Wire Line
+	3650 3900 3650 3950
+Wire Wire Line
+	3650 3950 4450 3950
+Wire Wire Line
+	4450 3950 4450 3550
+Wire Wire Line
+	4450 3650 4600 3650
+Wire Wire Line
+	4450 3550 4600 3550
+Connection ~ 4450 3650
+Wire Wire Line
+	3950 3900 3950 3950
+Connection ~ 3950 3950
+Wire Wire Line
+	4200 4000 4200 3950
+Connection ~ 4200 3950
+$Comp
+L +BATT #PWR?
+U 1 1 55A41A46
+P 1450 1100
+F 0 "#PWR?" H 1450 1050 20  0001 C CNN
+F 1 "+BATT" H 1450 1200 30  0000 C CNN
+F 2 "" H 1450 1100 60  0000 C CNN
+F 3 "" H 1450 1100 60  0000 C CNN
+	1    1450 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 55A41A55
+P 1450 1500
+F 0 "#PWR?" H 1450 1500 30  0001 C CNN
+F 1 "GND" H 1450 1430 30  0001 C CNN
+F 2 "" H 1450 1500 60  0000 C CNN
+F 3 "" H 1450 1500 60  0000 C CNN
+	1    1450 1500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1350 1400 1450 1400
+Wire Wire Line
+	1450 1400 1450 1500
+Wire Wire Line
+	1350 1200 1450 1200
+Wire Wire Line
+	1450 1200 1450 1100
+Wire Wire Line
+	1300 3400 1300 3250
+Wire Wire Line
+	1300 3300 2000 3300
+Connection ~ 1300 3300
+Wire Wire Line
+	1600 3450 1600 3300
+Connection ~ 1600 3300
+Wire Wire Line
+	1300 3900 1300 4050
+Wire Wire Line
+	1300 4050 1600 4050
+Wire Wire Line
+	1600 4050 1600 3850
+Wire Wire Line
+	1300 2750 1300 2600
+Wire Wire Line
+	1450 4050 1450 4100
+Connection ~ 1450 4050
+$Comp
+L GND #PWR?
+U 1 1 55A41B7F
+P 1450 4100
+F 0 "#PWR?" H 1450 4100 30  0001 C CNN
+F 1 "GND" H 1450 4030 30  0001 C CNN
+F 2 "" H 1450 4100 60  0000 C CNN
+F 3 "" H 1450 4100 60  0000 C CNN
+	1    1450 4100
+	1    0    0    -1  
+$EndComp
+$Comp
+L +BATT #PWR?
+U 1 1 55A41B8E
+P 1300 2600
+F 0 "#PWR?" H 1300 2550 20  0001 C CNN
+F 1 "+BATT" H 1300 2700 30  0000 C CNN
+F 2 "" H 1300 2600 60  0000 C CNN
+F 3 "" H 1300 2600 60  0000 C CNN
+	1    1300 2600
+	1    0    0    -1  
+$EndComp
+$Comp
+L MOD1021 U?
+U 1 1 55A4276E
+P 9200 3150
+F 0 "U?" H 9350 3750 70  0000 C CNN
+F 1 "MOD1021" H 9200 2550 70  0000 C CNN
+F 2 "~" H 9200 3050 60  0000 C CNN
+F 3 "~" H 9200 3050 60  0000 C CNN
+	1    9200 3150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8500 2800 8350 2800
+Wire Wire Line
+	8350 2800 8350 2550
+Wire Wire Line
+	8500 3400 8350 3400
+Wire Wire Line
+	8350 3400 8350 4700
+$Comp
+L CONN_2 P?
+U 1 1 55A427D9
+P 10100 4000
+F 0 "P?" V 10050 4000 40  0000 C CNN
+F 1 "SPK" V 10150 4000 40  0000 C CNN
+F 2 "" H 10100 4000 60  0000 C CNN
+F 3 "" H 10100 4000 60  0000 C CNN
+	1    10100 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9750 3900 8450 3900
+Wire Wire Line
+	8450 3900 8450 3500
+Wire Wire Line
+	8450 3500 8500 3500
+Wire Wire Line
+	9750 4100 9750 3950
+Wire Wire Line
+	9750 3950 8250 3950
+Wire Wire Line
+	8250 3950 8250 3300
+Wire Wire Line
+	8250 3300 8500 3300
+Wire Wire Line
+	6500 4350 7000 4350
+Wire Wire Line
+	7000 4350 7000 2900
+Wire Wire Line
+	7000 2900 8500 2900
+Wire Wire Line
+	6500 4450 7100 4450
+Wire Wire Line
+	7100 4450 7100 3000
+Wire Wire Line
+	7100 3000 8500 3000
+Wire Wire Line
+	9900 2800 10200 2800
+Wire Wire Line
+	8350 3800 10050 3800
+Wire Wire Line
+	10050 3800 10050 3400
+Wire Wire Line
+	10050 3400 9900 3400
+Connection ~ 8350 3800
+Text Label 10200 2800 0    60   ~ 0
+MP3_BSY
+Text Label 2000 3300 0    60   ~ 0
+LDR_SIG
+Wire Wire Line
+	1350 1300 1650 1300
+Text Label 1650 1300 0    60   ~ 0
+PIR_SIG
+$EndSCHEMATC
