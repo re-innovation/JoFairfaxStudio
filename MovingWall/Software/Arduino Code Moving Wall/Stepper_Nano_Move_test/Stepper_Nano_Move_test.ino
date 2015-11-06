@@ -215,22 +215,22 @@ void loop() {
             {
               Serial.println(stepper1.currentPosition());
               // This displays the current position all the time
-              
-              // We want to read the voltage during every step
-              // If the voltage drops below a certain amount
-              // We want to store the voltage and stop the movement of the motor
-              if(analogRead(voltageMonitor)<=200)
-              {
-                // This means the voltage is around 10V on the input
-                previousStep = stepper1.currentPosition();  // Store the value to EEPROM
-                // Save this value before all the power fails
-                EEPROM.write(0, previousStep >> 8);    // Do this seperately
-                EEPROM.write(1, previousStep & 0xff); 
-                // Write it to serial for DEBUG
-                Serial.println("LOW VOLTAGE");
-                Serial.println(previousStep);
-                break;
-              }   
+//              
+//              // We want to read the voltage during every step
+//              // If the voltage drops below a certain amount
+//              // We want to store the voltage and stop the movement of the motor
+//              if(analogRead(voltageMonitor)<=200)
+//              {
+//                // This means the voltage is around 10V on the input
+//                previousStep = stepper1.currentPosition();  // Store the value to EEPROM
+//                // Save this value before all the power fails
+//                EEPROM.write(0, previousStep >> 8);    // Do this seperately
+//                EEPROM.write(1, previousStep & 0xff); 
+//                // Write it to serial for DEBUG
+//                Serial.println("LOW VOLTAGE");
+//                Serial.println(previousStep);
+//                break;
+//              }   
               
             } 
             Serial.print("Moved to:");
@@ -243,21 +243,21 @@ void loop() {
               Serial.println(stepper1.currentPosition());
               // This displays the current position all the time
               
-              // We want to read the voltage during every step
-              // If the voltage drops below a certain amount
-              // We want to store the voltage and stop the movement of the motor
-              if(analogRead(voltageMonitor)<=200)
-              {
-                // This means the voltage is around 10V on the input
-                previousStep = stepper1.currentPosition();  // Store the value to EEPROM
-                // Save this value before all the power fails
-                EEPROM.write(0, previousStep >> 8);    // Do this seperately
-                EEPROM.write(1, previousStep & 0xff); 
-                // Write it to serial for DEBUG
-                Serial.println("LOW VOLTAGE");
-                Serial.println(previousStep);
-                break;
-              }    
+//              // We want to read the voltage during every step
+//              // If the voltage drops below a certain amount
+//              // We want to store the voltage and stop the movement of the motor
+//              if(analogRead(voltageMonitor)<=200)
+//              {
+//                // This means the voltage is around 10V on the input
+//                previousStep = stepper1.currentPosition();  // Store the value to EEPROM
+//                // Save this value before all the power fails
+//                EEPROM.write(0, previousStep >> 8);    // Do this seperately
+//                EEPROM.write(1, previousStep & 0xff); 
+//                // Write it to serial for DEBUG
+//                Serial.println("LOW VOLTAGE");
+//                Serial.println(previousStep);
+//                break;
+//              }    
             }  
             Serial.print("Moved to:");
             Serial.println(step3);
@@ -269,21 +269,21 @@ void loop() {
               Serial.println(stepper1.currentPosition());
               // This displays the current position all the time
 
-              // We want to read the voltage during every step
-              // If the voltage drops below a certain amount
-              // We want to store the voltage and stop the movement of the motor
-              if(analogRead(voltageMonitor)<=200)
-              {
-                // This means the voltage is around 10V on the input
-                previousStep = stepper1.currentPosition();  // Store the value to EEPROM
-                // Save this value before all the power fails
-                EEPROM.write(0, previousStep >> 8);    // Do this seperately
-                EEPROM.write(1, previousStep & 0xff); 
-                // Write it to serial for DEBUG
-                Serial.println("LOW VOLTAGE");
-                Serial.println(previousStep);
-                break;
-              }           
+//              // We want to read the voltage during every step
+//              // If the voltage drops below a certain amount
+//              // We want to store the voltage and stop the movement of the motor
+//              if(analogRead(voltageMonitor)<=200)
+//              {
+//                // This means the voltage is around 10V on the input
+//                previousStep = stepper1.currentPosition();  // Store the value to EEPROM
+//                // Save this value before all the power fails
+//                EEPROM.write(0, previousStep >> 8);    // Do this seperately
+//                EEPROM.write(1, previousStep & 0xff); 
+//                // Write it to serial for DEBUG
+//                Serial.println("LOW VOLTAGE");
+//                Serial.println(previousStep);
+//                break;
+//              }           
             }  
             Serial.print("Moved to:");
             Serial.println("0");
@@ -343,20 +343,20 @@ void loop() {
   Serial.print(distance);
   Serial.println(" cm");  
   
-  // We want to read the voltage during every step
-  // If the voltage drops below a certain amount
-  // We want to store the voltage and stop the movement of the motor
-  if(analogRead(voltageMonitor)<=200)
-  {
-    // This means the voltage is around 10V on the input
-    previousStep = stepper1.currentPosition();  // Store the value to EEPROM
-    // Save this value before all the power fails
-    EEPROM.write(0, previousStep >> 8);    // Do this seperately
-    EEPROM.write(1, previousStep & 0xff); 
-    // Write it to serial for DEBUG
-    Serial.println("LOW VOLTAGE");
-    Serial.println(previousStep);
-  }    
+//  // We want to read the voltage during every step
+//  // If the voltage drops below a certain amount
+//  // We want to store the voltage and stop the movement of the motor
+//  if(analogRead(voltageMonitor)<=200)
+//  {
+//    // This means the voltage is around 10V on the input
+//    previousStep = stepper1.currentPosition();  // Store the value to EEPROM
+//    // Save this value before all the power fails
+//    EEPROM.write(0, previousStep >> 8);    // Do this seperately
+//    EEPROM.write(1, previousStep & 0xff); 
+//    // Write it to serial for DEBUG
+//    Serial.println("LOW VOLTAGE");
+//    Serial.println(previousStep);
+//  }    
 
 //  // ********** TEST CODE********************
 //  // This is TEST CODE for triggering on SW1
