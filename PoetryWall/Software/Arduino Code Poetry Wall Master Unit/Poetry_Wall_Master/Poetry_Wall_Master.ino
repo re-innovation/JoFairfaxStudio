@@ -129,9 +129,9 @@ int maxSpeed = 500;  // The maximum speed for the motor (typical values 200-800)
 int acceleration = 100;  // Acceleration of the motor (typical values (50 - 400)
 
 
-int wheelsToTrigger = 3;   // This is the number of wheels to trigger
+int wheelsToTrigger = 5;   // This is the number of wheels to trigger
 
-int secondsToWait = 2;  // The seconds to wait before starting to check if its been triggered again
+int secondsToWait = 3;  // The seconds to wait before starting to check if its been triggered again
 // ********************* END OF USER VARIABLES***************************
 // **********************************************************************
 
@@ -234,17 +234,12 @@ void loop() {
     }
     Serial.println("");
     // At this point we have an array of random numbers in which no two are the same.
-
-
+    
     // Now we can call the motors required with a serial command.
-    for(int i=0;i<=wheelsToTrigger;i++)
+    for(int z=1;z<=wheelsToTrigger;z++)
     {
-      // First we clear the serial port
-      inputString = "";
-      Serial.flush();     
-      
       // Here we ask each slave unit to switch on
-      switch(randArray[i])
+      switch(randArray[z])
       {
         case 1:
           Serial.println("a00M01F-----");
@@ -283,14 +278,16 @@ void loop() {
           Serial.println("a05M02B-----");
         break;
       }
-      
-//      // Here we wait until "OK" is received by the unit
-//      while(!Serial.available());
-//      serialEvent();
+      // Here clear the serial port
+      inputString = "";
+      Serial.flush(); 
+      // Then we wait for the OK message to be received.
+      serialEvent();
+      delay(500); //Wait between sending data to slaves.
     }
-    delay(secondsToWait*1000); // a delay loop for slowing it all down
+    delay(secondsToWait*1000); // a delay loop for after the wheels change
   }
-  delay(500); // This is just a short loop delay
+  delay(200); // This is just a short loop delay
   
   // ********** TEST CODE********************
   // This is TEST CODE for triggering on SW1
@@ -313,10 +310,12 @@ void loop() {
  response.  Multiple bytes of data may be available.
  */
 void serialEvent() { 
-
-
+  
   // Block until data available.
-  if(Serial.available()>= 2){
+  while(Serial.available()<2);
+  
+  if(Serial.available()>= 2)
+  {
     for (int i=0;i<2;i++)
     {
       inputString += (char)Serial.read();    
