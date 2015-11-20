@@ -9,27 +9,46 @@
  * Defines and typedefs
  */
 
-#define DEBUG_MOTORS
-#define DEBUG_COMMANDS
-#define DEBUG_DETECTORS
+//#define DEBUG_MOTORS
+//#define DEBUG_COMMANDS
+//#define DEBUG_DETECTORS
 
 #define NUMBER_OF_MOTORS (1)
 
+#define DETECTOR_TRIGGER_THRESHOLD (500)
+
+#define FORWARD_MOTION_EXTRA_STEPS (30)
+#define BACKWARD_MOTION_EXTRA_STEPS (170)
+
+#define FORWARD_SEEK_EXTRA_STEPS (50)
+#define BACKWARD_SEEK_EXTRA_STEPS (230)
+
 /* 
  * STEPS_PER_WORD is the ideal number of steps to move between words
- * When the detector finds the actual word, STEPS_TO_STOP is
- * the number of steps that should be moved before stop.
+ * From this and NUMBER_OF_WORDS, the steps per word and steps per divison
+ * are derived.
  */
-#define STEPS_PER_WORD (1200L)
-#define STEPS_TO_STOP_FORWARD (100L)
-#define STEPS_TO_STOP_BACKWARD (200L)
+#define STEPS_PER_REV (6230L)
+#define NUMBER_OF_WORDS (11L)
 
+#define STEPS_PER_WORD (STEPS_PER_REV / (NUMBER_OF_WORDS-1))
+#define STEPS_PER_DIVISION (STEPS_PER_WORD/2)
+
+/* A motor can be in one of five states:
+ * Stopped because the detector tripped (this should be the normal stopped state)
+ * Stopped because the motor ran through its full number of steps-per-word
+ *		- normally this shouldn't happen because the detector should trip and command a stop
+ * Moving away from old stopped position towards first dectector edge
+ * Moving to second detector edge
+ * Stopping after second detector edge
+ */
 enum move_state
 {
 	MS_STOPPED_DETECTOR,
 	MS_STOPPED_MOTOR,
-	MS_MOVING_AWAY_FROM_OLD_POSITION,
-	MS_MOVING_TO_NEW_POSITION
+	MS_MOVING_TO_FIRST_EDGE,
+	MS_MOVING_TO_SECOND_EDGE,
+	MS_STOPPING
 };
 typedef enum move_state MOVE_STATE;
 
@@ -56,6 +75,11 @@ static AccelStepper s_motors[NUMBER_OF_MOTORS] = {
 	//AccelStepper(8, 9, 11, 10, 12)
 };
 
+static bool s_motor_is_running[NUMBER_OF_MOTORS] = {
+	false,
+	//false,
+};
+
 static MOVE_STATE s_move_state[NUMBER_OF_MOTORS] = {
 	MS_STOPPED_MOTOR,
 	//MS_STOPPED_MOTOR
@@ -75,12 +99,12 @@ static uint8_t s_detector_pins[NUMBER_OF_MOTORS] = {
 	//A5
 };
 
-static uint32_t s_detector_average[NUMBER_OF_MOTORS];
+static uint32_t s_detector_values[NUMBER_OF_MOTORS];
 
 static void debug_task_fn()
 {
 	#ifdef DEBUG_DETECTORS
-	Serial.print(s_detector_average[0]);
+	Serial.print(s_detector_values[0]);
 	Serial.println(s_reel_detector_triggered[0] ? "(trig)" : "");
 	#endif
 }
@@ -191,14 +215,23 @@ static void set_motor_state(uint8_t motor, uint8_t new_state)
 		Serial.print(": detector stop at ");
 		Serial.print(s_motors[s_next_motor].currentPosition());
 		break;
-	case MS_MOVING_AWAY_FROM_OLD_POSITION:
-		Serial.print(": moving from ");
+	case MS_MOVING_TO_FIRST_EDGE:
+		Serial.print(": moving to E1 from ");
+		Serial.print(s_motors[s_next_motor].currentPosition());
+		break;
+	case MS_MOVING_TO_SECOND_EDGE:
+		Serial.print(": moving to E2 from ");
 		Serial.print(s_motors[s_next_motor].currentPosition());
 		break;
 	}
 
 	Serial.println("");
 	#endif
+
+	if ((new_state == MS_STOPPED_MOTOR) || (new_state == MS_STOPPED_DETECTOR))
+	{
+		Serial.print("OK");
+	}
 }
 
 static void process_next_command()
@@ -211,17 +244,7 @@ static void process_next_command()
 	{
 		s_motors[s_next_motor].move(-STEPS_PER_WORD);
 	}
-	set_motor_state(s_next_motor, MS_MOVING_AWAY_FROM_OLD_POSITION);
-}
-
-static void setup_motors()
-{
-	uint8_t i;
-	for (i = 0; i < NUMBER_OF_MOTORS; i++)
-	{
-		s_motors[i].setMaxSpeed(200);
-		s_motors[i].setAcceleration(100);	
-	}
+	set_motor_state(s_next_motor, MS_MOVING_TO_FIRST_EDGE);
 }
 
 static void stop_motor(uint8_t motor)
@@ -229,52 +252,82 @@ static void stop_motor(uint8_t motor)
 	// Set the motor stop steps based on direction
 	if (s_next_direction_is_forwards)
 	{
-		s_motors[motor].move(STEPS_TO_STOP_FORWARD);
+		s_motors[motor].move(STEPS_PER_DIVISION + FORWARD_MOTION_EXTRA_STEPS);
 	}
 	else
 	{
-		s_motors[motor].move(-STEPS_TO_STOP_BACKWARD);
+		s_motors[motor].move(-STEPS_PER_DIVISION - BACKWARD_MOTION_EXTRA_STEPS);
+	}
+}
+
+static void handle_move_to_first_edge(int i)
+{
+	// Wait for the detector to un-trigger from old position
+	if (!s_reel_detector_triggered[i])
+	{
+		set_motor_state(i, MS_MOVING_TO_SECOND_EDGE);
+	}
+	else if (!s_motor_is_running[i])
+	{
+		set_motor_state(i, MS_STOPPED_MOTOR);
+	}
+}
+
+static void handle_move_to_second_edge(int i)
+{
+	if (s_motor_is_running[i])
+	{
+		// Wait for the detector to trigger at new position
+		if (s_reel_detector_triggered[i])
+		{
+			stop_motor(i);
+			set_motor_state(i, MS_STOPPING);		
+		}
+	}				
+	else
+	{
+		set_motor_state(i, MS_STOPPED_MOTOR);
+	}
+}
+
+static void handle_stopping(int i)
+{
+	if (!s_motor_is_running[i])
+	{
+		set_motor_state(i, MS_STOPPED_DETECTOR);
 	}
 }
 
 static void run_motors()
 {
 	uint8_t i;
-	bool motor_is_running = false;
-
+	
 	for (i = 0; i < NUMBER_OF_MOTORS; i++)
 	{
-		motor_is_running = s_motors[i].run();
+		s_motor_is_running[i] = s_motors[i].run();
 		
-		/* Decide if motor should keep turning or not */
+		/* Handle motor motion based on its current state */
 		switch(s_move_state[i])
 		{
-			case MS_MOVING_AWAY_FROM_OLD_POSITION:
-				// Wait for the detector to un-trigger from old position
-				if (!s_reel_detector_triggered[i])
-				{
-					set_motor_state(i, MS_MOVING_TO_NEW_POSITION);
-				}
+			case MS_MOVING_TO_FIRST_EDGE:
+				handle_move_to_first_edge(i);
 				break;
-			case MS_MOVING_TO_NEW_POSITION:
-				if (motor_is_running)
-				{
-					// Wait for the detector to trigger at new position
-					if (s_reel_detector_triggered[i])
-					{
-						stop_motor(i);
-						set_motor_state(i, MS_STOPPED_DETECTOR);		
-					}
-				}				
-				else
-				{
-					set_motor_state(i, MS_STOPPED_MOTOR);
-				}
+			case MS_MOVING_TO_SECOND_EDGE:
+				handle_move_to_second_edge(i);
+				break;
+			case MS_STOPPING:
+				handle_stopping(i);
 				break;
 			default:
 				break;
 		}
 	}
+}
+
+static void update_detector(int detector_index)
+{
+	s_detector_values[detector_index] = analogRead(s_detector_pins[detector_index]);
+	s_reel_detector_triggered[detector_index] = s_detector_values[detector_index] < DETECTOR_TRIGGER_THRESHOLD;
 }
 
 static void update_detectors()
@@ -283,22 +336,11 @@ static void update_detectors()
 	
 	for (i = 0; i < NUMBER_OF_MOTORS; i++)
 	{
-		s_detector_average[i] += analogRead(s_detector_pins[i]);
-		s_detector_average[i] /= 2;
-
-		/* Use some hysteresis when detecting state change */
-		if (s_reel_detector_triggered[i])
-		{
-			s_reel_detector_triggered[i] = (s_detector_average[i] >= 200);
-		}
-		else
-		{
-			s_reel_detector_triggered[i] = (s_detector_average[i] >= 300);	
-		}
+		update_detector(i);		
 	}
 }
 
-static bool move_motor_until_trigger(uint8_t motor, float speed)
+static bool move_motor_until_trigger_changed(uint8_t motor, float speed)
 {
 	bool start_trigger;
 
@@ -313,6 +355,8 @@ static bool move_motor_until_trigger(uint8_t motor, float speed)
 		s_debug_task.tick();
 		s_motors[motor].runSpeed();
 	} while (s_reel_detector_triggered[motor] == start_trigger);
+
+	return !start_trigger;
 }
 
 static void initial_seek_to_word()
@@ -320,34 +364,39 @@ static void initial_seek_to_word()
 
 	/* Move at low speed and look for edges */
 	int i;
+	int first_edge_was_low;
 	for (i = 0; i < NUMBER_OF_MOTORS; i++)
 	{
+
 		// First move forward until an edge is reached - this provides a reference point
-		move_motor_until_trigger(i, 200);
+		first_edge_was_low = move_motor_until_trigger_changed(i, 100);
+		
+		s_motors[i].setCurrentPosition(0);
+
 		#ifdef DEBUG_MOTORS
-		Serial.println("Trigger point found.");
+		Serial.print("Trigger point found (");
+		Serial.print(first_edge_was_low ? "low" : "high");
+		Serial.println("). Moving to word.");
 		#endif
 		
 		// Then move to centre the word
-		if (s_reel_detector_triggered[i])
+		if (first_edge_was_low)
 		{
-			#ifdef DEBUG_MOTORS
-			Serial.println("Moving forwards to word");
-			#endif
 			// Reel just triggered, move forwards to centre
-			s_motors[i].move(50);
+			s_motors[i].moveTo(STEPS_PER_DIVISION + FORWARD_SEEK_EXTRA_STEPS);
+
 		}
 		else
 		{	
-			#ifdef DEBUG_MOTORS
-			Serial.println("Moving backwards to word");
-			#endif
-			// Reel just untriggered, move backwards to centre
-			s_motors[i].move(-320);
+			// Reel just untriggered, move fowards to centre
+			s_motors[i].moveTo(STEPS_PER_DIVISION - BACKWARD_SEEK_EXTRA_STEPS);
 		}
 
-		while( s_motors[i].run() )
+		s_motors[i].setSpeed(100);
+
+		while( s_motors[i].distanceToGo() )
 		{
+			s_motors[i].runSpeed();
 			s_debug_task.tick();
 		}
 	}
@@ -358,7 +407,28 @@ static void fill_averages()
 	int i;
 	for (i = 0; i < NUMBER_OF_MOTORS; i++)
 	{
-		s_detector_average[i] = analogRead(s_detector_pins[i]);
+		s_detector_values[i] = analogRead(s_detector_pins[i]);
+	}
+}
+
+static void setup_motors_for_init()
+{
+	uint8_t i;
+	for (i = 0; i < NUMBER_OF_MOTORS; i++)
+	{
+		// Setting a very high accelleration means that start/stop is effectively instanteneous,
+		// which is nicer for finding initial position
+		s_motors[i].setAcceleration(1000);
+		s_motors[i].setMaxSpeed(200);
+	}
+}
+
+static void setup_motors_for_run()
+{
+	uint8_t i;
+	for (i = 0; i < NUMBER_OF_MOTORS; i++)
+	{
+		s_motors[i].setAcceleration(100);	
 	}
 }
 
@@ -369,7 +439,7 @@ static void fill_averages()
 void setup()
 {
 	Serial.begin(115200);	
-	setup_motors();
+	setup_motors_for_init();
 
 	fill_averages();
 
@@ -380,6 +450,8 @@ void setup()
 	#ifdef DEBUG_MOTORS
 	Serial.println("Seek complete.");
 	#endif
+
+	setup_motors_for_run();
 }
 
 void loop()
