@@ -1,7 +1,7 @@
 /*
- * command_reader.cpp
+ * commands.cpp
  * 
- * Build and processes commands of the form
+ * Processes commands of the form
  * aXXMYYD
  * where:
  * XX is a two-digit node ID
