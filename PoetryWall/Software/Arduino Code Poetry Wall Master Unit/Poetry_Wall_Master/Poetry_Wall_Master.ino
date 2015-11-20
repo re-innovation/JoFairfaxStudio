@@ -59,6 +59,9 @@
 #include <avr/eeprom.h>
 
 #include <AccelStepper.h>
+
+#include "word_reel.h"
+
 #define HALFSTEP 8
 
 // Motor pin definitions
@@ -78,6 +81,8 @@
 //#define voltageMonitor A3  // This is the pin to measure the voltage on the input
 
 #define photoSensor1 A4
+
+#define NUMBER_OF_REELS (0)
 
 // ****** Serial Data Read***********
 // Variables for the serial data read
@@ -113,9 +118,11 @@ int motorID = 0;  // Holds the int for the motor to run
 int sensorValue = 0;  // For the distance sensor
 unsigned long duration, distance;// For the distance sensor
 
-// Initialize with pin sequence IN1-IN3-IN2-IN4 for using the AccelStepper with 28BYJ-48
-AccelStepper stepper1(HALFSTEP, motor1Pin1, motor1Pin3, motor1Pin2, motor1Pin4);
-AccelStepper stepper2(HALFSTEP, motor2Pin1, motor2Pin3, motor2Pin2, motor2Pin4);
+// Declare two reels on the master unit
+static WordReel s_reels[] = {
+  WordReel(motor1Pin1, motor1Pin3, motor1Pin2, motor1Pin4, A4, 0),
+  WordReel(motor2Pin1, motor2Pin3, motor2Pin2, motor2Pin4, A5, 1)
+};
 
 // ****************USER VARIABLES****************************************
 // **********************************************************************
@@ -124,19 +131,94 @@ AccelStepper stepper2(HALFSTEP, motor2Pin1, motor2Pin3, motor2Pin2, motor2Pin4);
 int minDistance = 20;  // Minimum distance (cm) for the Ultrasonic Sensor
 int maxDistance = 80;  // Maximum distance (cm) for the Ultrasonic Sensor
 
-// Stepper motor variables
-int maxSpeed = 500;  // The maximum speed for the motor (typical values 200-800)
-int acceleration = 100;  // Acceleration of the motor (typical values (50 - 400)
-
-
 int wheelsToTrigger = 5;   // This is the number of wheels to trigger
 
 int secondsToWait = 3;  // The seconds to wait before starting to check if its been triggered again
+
+// Each wheel is associated with a two-digit unit ID.
+// This array maps between wheels and unit ID
+char wheel_to_unit_id_map[13][3] = {
+  "", // There is no wheel 0
+  "00",
+  "00",
+  "01",
+  "01",
+  "02",
+  "02",
+  "03",
+  "03",
+  "04",
+  "04",
+  "05",
+  "05"
+};
+
+// Each wheel is associated with two-digit motor ID.
+// This array maps between wheels and motor ID
+char wheel_to_motor_id_map[13][3] = {
+  "", // There is no wheel 0
+  "01",
+  "02",
+  "01",
+  "02",
+  "01",
+  "02",
+  "01",
+  "02",
+  "01",
+  "02",
+  "01",
+  "02"
+};
+
 // ********************* END OF USER VARIABLES***************************
 // **********************************************************************
 
 long randNumber;  // This holds the random number
 int randArray[12];  // Creates an int array for holding the random numbers
+
+char commandBuffer[13];
+
+static void makeNewCommand(int wheel)
+{
+  commandBuffer[0] = 'a'; // Commands always start with 'a';
+
+  // Map wheel number to unit ID
+  commandBuffer[1] = wheel_to_unit_id_map[wheel][0];
+  commandBuffer[2] = wheel_to_unit_id_map[wheel][1];
+
+  commandBuffer[3] = 'M';
+
+  commandBuffer[4] = wheel_to_motor_id_map[wheel][0];
+  commandBuffer[5] = wheel_to_motor_id_map[wheel][1];
+
+  // Even wheels go backwards, odd forwards
+  commandBuffer[6] = (wheel % 2) ? 'F' : 'B';
+
+  strncpy(&commandBuffer[7], "-----", 5);
+  commandBuffer[12] = '\0';
+}
+
+static void run_motors()
+{
+  uint8_t i;
+  
+  for (i = 0; i < NUMBER_OF_REELS; i++)
+  {
+    s_reels[i].update_detector();
+    s_reels[i].run();
+  }
+}
+
+static void delay_and_run_motors(int delay)
+{
+  unsigned long now = millis();
+
+  while ((millis() - now) < delay)
+  {
+    run_motors();
+  }
+}
 
 void setup() {
 
@@ -154,13 +236,12 @@ void setup() {
   
   Serial.begin(9600);
 
-  stepper1.setMaxSpeed(maxSpeed);  // usual value = 500
-  stepper1.setSpeed(maxSpeed);  // usual value = 200
-  stepper1.setAcceleration(acceleration); // usual value = 100
-
-  stepper2.setMaxSpeed(maxSpeed);  // usual value = 500
-  stepper2.setSpeed(maxSpeed);  // usual value = 200
-  stepper2.setAcceleration(acceleration); // usual value = 100
+  // Move all reels to initial positions
+  int i;
+  for (i = 0; i < NUMBER_OF_REELS; i++)
+  {
+    s_reels[i].initial_seek_to_word();
+  }
 
   // Retrieve the setpoints from EEPROM
   motor1 = EEPROM.read(2);
@@ -193,8 +274,6 @@ void loop() {
   }
   distance = distance/10;  // Averaging
   
-  
-
   if((distance<=maxDistance&&distance>=minDistance)||digitalRead(SW1)==LOW)
   {
     unitTrigger = HIGH;
@@ -238,57 +317,35 @@ void loop() {
     // Now we can call the motors required with a serial command.
     for(int z=1;z<=wheelsToTrigger;z++)
     {
-      // Here we ask each slave unit to switch on
-      switch(randArray[z])
+      if (randArray[z] == 1)
       {
-        case 1:
-          Serial.println("a00M01F-----");
-        break;
-        case 2:
-          Serial.println("a00M02B-----");
-        break;
-        case 3:
-          Serial.println("a01M01F-----");
-        break;
-        case 4:
-          Serial.println("a01M02B-----");
-        break;
-        case 5:
-          Serial.println("a02M01F-----");
-        break;
-        case 6:
-          Serial.println("a02M02B-----");
-        break;
-        case 7:
-          Serial.println("a03M01F-----");
-        break;
-        case 8:
-          Serial.println("a03M02B-----");
-        break;
-        case 9:
-          Serial.println("a04M01F-----");
-        break;
-        case 10:
-          Serial.println("a04M02B-----");
-        break;
-        case 11:
-          Serial.println("a05M01F-----");
-        break;
-        case 12:
-          Serial.println("a05M02B-----");
-        break;
+        //s_reels[0].move_one_word(true);
       }
-      // Here clear the serial port
-      inputString = "";
-      Serial.flush(); 
-      // Then we wait for the OK message to be received.
-      serialEvent();
-      delay(500); //Wait between sending data to slaves.
+      else if (randArray[z] == 2)
+      {
+        //s_reels[1].move_one_word(false);
+      }
+      else
+      {
+        makeNewCommand(randArray[z]);
+        // Here we ask each slave unit to switch on
+        Serial.println(commandBuffer);
+        
+        // Here clear the serial port
+        inputString = "";
+        Serial.flush(); 
+        // Then we wait for the OK message to be received.
+        serialEvent();
+
+        delay_and_run_motors(500); //Wait between sending data to slaves.
+      }
     }
-    delay(secondsToWait*1000); // a delay loop for after the wheels change
+    delay_and_run_motors(secondsToWait*1000); // a delay loop for after the wheels change
   }
-  delay(200); // This is just a short loop delay
+  delay_and_run_motors(200); // This is just a short loop delay
   
+  run_motors();
+
   // ********** TEST CODE********************
   // This is TEST CODE for triggering on SW1
   if(digitalRead(SW1)==LOW)
