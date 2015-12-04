@@ -16,14 +16,13 @@
  * Local Libraries
  */
 
+#include "debug_config.h"
 #include "slave_config.h"
 #include "commands.h"
 
 /*
  * Defines and typedefs
  */
-
-//#define DEBUG_COMMANDS
 
 /*
  * Local Variables
