@@ -67,12 +67,12 @@
 #define TRIG_PIN A2  //  The connections for the ultrasonic distance sensor
 #define ECHO_PIN A1
 
-#define NUMBER_OF_MASTER_REELS (1)
-#define NUMBER_OF_SLAVE_REELS (2)
+#define NUMBER_OF_MASTER_REELS (2)
+#define NUMBER_OF_SLAVE_REELS (10)
 
 #define NUMBER_OF_REELS_TOTAL (NUMBER_OF_MASTER_REELS + NUMBER_OF_SLAVE_REELS)
 
-#define WHEELS_TO_MOVE_PER_TRIGGER (2)
+#define WHEELS_TO_MOVE_PER_TRIGGER (3)
 
 #define MINIMUM_TRIGGER_DISTANCE 5
 #define MAXIMUM_TRIGGER_DISTANCE 15
@@ -80,6 +80,8 @@
 #define RESET_PIN (2)
 #define CMD_RX_PIN (3)
 #define CMD_TX_PIN (4)
+
+#define SERIAL_TIMEOUT_MS (6000UL)
 
 #define LED_PIN (13)
 
@@ -92,6 +94,14 @@ static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
     5, 7, 6, 8,               // Motor pins
     A4,                       // Detector pin
     0,                        // Motor ID
+    50, 250,                  // Forward and backward steps to centre word at setup
+    30, 170,                  // Forward and backward steps to centre word when running
+    true,                     // Invert fwd/back movement sense
+    on_master_move_complete), // Function to call when move is complete
+  WordReel(
+    9, 11, 10, 12,            // Motor pins
+    A5,                       // Detector pin
+    1,                        // Motor ID
     50, 250,                  // Forward and backward steps to centre word at setup
     30, 170,                  // Forward and backward steps to centre word when running
     true,                     // Invert fwd/back movement sense
@@ -110,11 +120,27 @@ static bool s_wait = false;
 static char reel_to_unit_id_map[NUMBER_OF_SLAVE_REELS][3] = {
   "00", // Reel 1 is on slave 00
   "00",  // Reel 2 is on slave 00
+  "01", // Reel 1 is on slave 00
+  "01",  // Reel 2 is on slave 00
+  "02", // Reel 1 is on slave 00
+  "02",  // Reel 2 is on slave 00
+  "03", // Reel 1 is on slave 00
+  "03",  // Reel 2 is on slave 00
+  "04", // Reel 1 is on slave 00
+  "04", // Reel 1 is on slave 00
 };
 
 // Each reel is associated with two-digit motor ID.
 // This array maps between reels and motor ID
 static char reel_to_motor_id_map[NUMBER_OF_SLAVE_REELS][3] = {
+  "01", // Slave 1, reel 1
+  "02",  // Slave 1, reel 2
+  "01", // Slave 1, reel 1
+  "02",  // Slave 1, reel 2
+  "01", // Slave 1, reel 1
+  "02",  // Slave 1, reel 2
+  "01", // Slave 1, reel 1
+  "02",  // Slave 1, reel 2
   "01", // Slave 1, reel 1
   "02"  // Slave 1, reel 2
 };
@@ -194,12 +220,30 @@ static void run_motors()
   }
 }
 
-static void read_software_serial_blocking(int expected)
+static void read_software_serial_blocking(int expected, int timeout=0)
 {
 
   // Block until data available.
-  while(s_serial_cmd.available()<expected);
-  
+  if (timeout == 0)
+  {
+      while(s_serial_cmd.available()<expected);
+  }
+  else
+  {
+      unsigned long start = millis();
+      bool got_expected = false;
+      while ((millis() - start) < timeout)
+      {
+        got_expected = (s_serial_cmd.available() >= expected);
+        if (got_expected) { break; }  
+      }
+
+      if (!got_expected)
+      {
+        Serial.println("Serial timeout!");
+      }
+  }
+
   #ifdef ECHO_SERIAL_INPUT
 
   String serialInput;
@@ -230,6 +274,8 @@ static void move_master_reel(int reel)
   while(s_wait) {
     run_motors();
   }
+
+  s_reels[reel].off();
 }
 
 static void on_master_move_complete()
@@ -250,7 +296,7 @@ static void move_slave_reel(int reel)
   s_serial_cmd.flush();
 
   // Expect two characters back from slave
-  read_software_serial_blocking(2);
+  read_software_serial_blocking(2, SERIAL_TIMEOUT_MS);
 }
 
 static void create_random_number_array(int * pRandArray)
@@ -394,6 +440,7 @@ void setup() {
   for (i = 0; i < NUMBER_OF_MASTER_REELS; i++)
   {
     s_reels[i].initial_seek_to_word();
+    s_reels[i].off();
   }
 
   // Retrieve the setpoints from EEPROM
@@ -422,7 +469,6 @@ void loop() {
 
 void switch_off_motors()
 {
-
   int i;
   for (i = 0; i < NUMBER_OF_MASTER_REELS; i++)
   {

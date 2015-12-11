@@ -20,16 +20,13 @@
  */
 
 #include "debug_config.h"
+#include "slave_config.h"
 #include "word_reel.h"
 #include "commands.h"
 
 /*
  * Defines
  */
-
-#define SLAVE_UNIT_ID "00"
-
-#define NUMBER_OF_REELS (2)
 
 #define CMD_RX_PIN (3)
 #define CMD_TX_PIN (4)
@@ -50,7 +47,7 @@ static WordReel s_reels[NUMBER_OF_REELS] = {
 
 	WordReel(
 		9, 11, 12, 10,
-		A0,
+		A5,
 		2,
 		150, 240,
 		30, 70,
@@ -64,9 +61,18 @@ static SoftwareSerial s_serial_cmd(CMD_RX_PIN, CMD_TX_PIN);
  * Private Functions
  */
 
+static void send_to_master(char const * str)
+{
+	pinMode(CMD_TX_PIN, OUTPUT);
+	s_serial_cmd.print(str);
+	pinMode(CMD_TX_PIN, INPUT);
+}
+
 static void on_move_complete(void)
 {
-	s_serial_cmd.print("OK");
+	Serial.println("Move complete!");
+	switch_off_motors();
+	send_to_master("OK");
 }
 
 /* debug_task_fn: Prints any repeating debug strings */
@@ -118,6 +124,17 @@ static void read_command_from_serial()
 	}
 }
 
+/* switch_off_motors: turns off all motor drives to save power */
+void switch_off_motors()
+{
+  int i;
+  for (i = 0; i < NUMBER_OF_REELS; i++)
+  {
+    s_reels[i].off();
+  }
+}
+
+
 /*
  * Arduino functions
  */
@@ -126,12 +143,16 @@ void setup()
 {
 	Serial.begin(9600);
 	s_serial_cmd.begin(9600);
+	
+	// Start serial TX pins as input to avoid contention
+	pinMode(CMD_TX_PIN, INPUT);
 
 	// Move all reels to initial positions
 	int i;
 	for (i = 0; i < NUMBER_OF_REELS; i++)
 	{
 		s_reels[i].initial_seek_to_word();
+		s_reels[i].off();
 	}
 }
 
