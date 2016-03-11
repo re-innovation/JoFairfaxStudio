@@ -9,7 +9,7 @@
  * are derived.
  */
 #define STEPS_PER_REV (6230L)
-#define NUMBER_OF_WORDS (11L)
+#define NUMBER_OF_WORDS (10L)
 
 #define STEPS_PER_WORD (STEPS_PER_REV / (NUMBER_OF_WORDS-1))
 #define STEPS_PER_DIVISION (STEPS_PER_WORD/2)
@@ -48,6 +48,8 @@ public:
 
 	void initial_seek_to_word();
 	
+	void run_interactive_calibration();
+
 	void move_one_word(bool direction_is_forwards);
 	void run();
 
@@ -66,8 +68,8 @@ private:
 	bool m_direction_forwards;
 	bool m_invert_direction;
 	
-	int m_seek_steps_fwd;
-	int m_seek_steps_bck;
+	int m_seek_steps_from_falling_edge;
+	int m_seek_steps_from_rising_edge;
 
 	int m_move_steps_fwd;
 	int m_move_steps_bck;
@@ -89,6 +91,12 @@ private:
 	bool move_until_trigger_changed(float speed);
 
 	void print_name();
+
+	void wait_for_newline();
+	void flush_incoming_serial();
+
+	void interactive_calibrate_edge(bool falling);
+	void interactive_calibrate_move(bool forwards);
 };
 
 

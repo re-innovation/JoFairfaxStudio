@@ -38,19 +38,19 @@
 static WordReel s_reels[NUMBER_OF_REELS] = {
 	WordReel(
 		5, 7, 6, 8,			// Motor pins
-		A4,					// Detector pin
+		A5,					// Detector pin
 		1,					// Motor ID
-		50, 240, 			// Forward and backward steps to centre word at setup
-		30, 170, 			// Forward and backward steps to centre word when running
-		false, 				// Invert fwd/back movement sense
+		251, 649, 			// Forward and backward steps to centre word at setup
+		-60, -300, 			// Forward and backward steps to centre word when running
+		true, 				// Invert fwd/back movement sense
 		on_move_complete),	// Function to call when move is complete
 
 	WordReel(
 		9, 11, 12, 10,
-		A5,
+		A4,
 		2,
-		150, 240,
-		30, 70,
+		640, 49,
+		-340, 280,
 		false,
 		on_move_complete)
 };

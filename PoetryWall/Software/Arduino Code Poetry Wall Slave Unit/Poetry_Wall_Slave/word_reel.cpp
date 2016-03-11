@@ -6,7 +6,7 @@
 #include "word_reel.h"
 
 WordReel::WordReel(int m1_pin, int m2_pin, int m3_pin, int m4_pin, int detector_pin, int id,
-	int extra_seek_steps_fwd, int extra_seek_steps_bck,
+	int extra_seek_steps_falling_edge, int extra_seek_steps_rising_edge,
 	int extra_move_steps_fwd, int extra_move_steps_bck,
 	bool invert_direction,
 	ON_MOVE_COMPLETE_CALLBACK cb)
@@ -19,8 +19,8 @@ WordReel::WordReel(int m1_pin, int m2_pin, int m3_pin, int m4_pin, int detector_
 	m_id = id;
 	m_invert_direction = invert_direction;
 
-	m_seek_steps_fwd = extra_seek_steps_fwd;
-	m_seek_steps_bck = extra_seek_steps_bck;
+	m_seek_steps_from_falling_edge = extra_seek_steps_falling_edge;
+	m_seek_steps_from_rising_edge = extra_seek_steps_rising_edge;
 
 	m_move_steps_fwd = extra_move_steps_fwd;
 	m_move_steps_bck = extra_move_steps_bck;
@@ -117,10 +117,20 @@ void WordReel::set_stop_target()
 	// Set the motor stop steps based on direction
 	if (m_direction_forwards)
 	{
+		#ifdef DEBUG_MOTORS
+		print_name();
+		Serial.print(": Fwd. stop target:");
+		Serial.println(STEPS_PER_DIVISION + m_move_steps_fwd);
+		#endif
 		m_motor->move(STEPS_PER_DIVISION + m_move_steps_fwd);
 	}
 	else
 	{
+		#ifdef DEBUG_MOTORS
+		print_name();
+		Serial.print(": Bck. stop target:");
+		Serial.println(-STEPS_PER_DIVISION - m_move_steps_bck);
+		#endif
 		m_motor->move(-STEPS_PER_DIVISION - m_move_steps_bck);
 	}
 }
@@ -199,33 +209,31 @@ void WordReel::initial_seek_to_word()
 	Serial.println(": Starting initial seek.");
 	#endif
 
-	int i;
-
 	setup_for_init();
 
 	// First move forward until an edge is reached - this provides a reference point
-	int first_edge_was_low = move_until_trigger_changed(100);
+	bool first_edge_was_falling = move_until_trigger_changed(100);
 	
 	#ifdef DEBUG_MOTORS
 	print_name();
 	Serial.print(": Found first edge. Moving to centre (");
-	Serial.print(first_edge_was_low ? "FWD" : "BCK");
+	Serial.print(first_edge_was_falling ? "FWD" : "BCK");
 	Serial.println(").");
 	#endif
 
 	m_motor->setCurrentPosition(0);
 
 	// Then move to centre the word
-	if (first_edge_was_low)
+	if (first_edge_was_falling)
 	{
 		// Reel just triggered, move forwards to centre
-		m_motor->moveTo(STEPS_PER_DIVISION + m_seek_steps_fwd);
+		m_motor->moveTo(m_seek_steps_from_falling_edge);
 
 	}
 	else
 	{	
 		// Reel just untriggered, move fowards to centre
-		m_motor->moveTo(STEPS_PER_DIVISION - m_seek_steps_bck);
+		m_motor->moveTo(m_seek_steps_from_rising_edge);
 	}
 
 	m_motor->setSpeed(100);
@@ -237,11 +245,161 @@ void WordReel::initial_seek_to_word()
 
 	setup_for_run();
 
-
 	#ifdef DEBUG_MOTORS
 	print_name();
 	Serial.println(": Ready!");
 	#endif
+}
+
+void WordReel::wait_for_newline()
+{
+	while (Serial.read() != '\n') {}	
+}
+
+void WordReel::flush_incoming_serial()
+{
+	while(Serial.available()) { (void)Serial.read(); }
+}
+
+void WordReel::interactive_calibrate_edge(bool falling)
+{
+	bool stop = false;
+
+	// Move till specified edge
+	while( falling != move_until_trigger_changed(100) ) {}
+	
+	flush_incoming_serial();
+
+	print_name();
+	Serial.print(": Found ");
+	Serial.print(falling ? "falling" : "rising");
+	Serial.println(" edge. Ready to move to word.");
+	print_name();
+	Serial.println(": Send a newline ('\\n') to start");
+	print_name();
+	Serial.println(": Send a second newline when the word has centred.");
+
+	wait_for_newline();
+
+	m_motor->setCurrentPosition(0);
+	m_motor->setSpeed(100);
+
+	while( !stop )
+	{
+		m_motor->runSpeed();
+		stop = Serial.available() && Serial.read() == '\n';
+	}
+
+	print_name();
+	Serial.print(": Stopped at ");
+	Serial.println(m_motor->currentPosition());
+	Serial.println();
+
+	flush_incoming_serial();
+
+	if (falling)
+	{
+		m_seek_steps_from_falling_edge = m_motor->currentPosition();
+	}
+	else
+	{
+		m_seek_steps_from_rising_edge = m_motor->currentPosition();	
+	}
+}
+
+void WordReel::interactive_calibrate_move(bool forwards)
+{
+
+	int * p_move_steps = forwards ? &m_move_steps_fwd : &m_move_steps_bck;
+	print_name();
+	Serial.print(": Moving one word ");
+	Serial.println(forwards ? "forwards." :" backwards.");
+
+	*p_move_steps = 0;
+
+	while(true)
+	{
+		print_name();
+		Serial.print(": Current steps = ");
+		Serial.print(forwards ? m_move_steps_fwd : m_move_steps_bck);
+		Serial.println(".");
+
+		move_one_word(forwards ^ m_invert_direction);
+
+		do
+		{
+			update_detector();
+			run();
+		} while(m_running);
+
+		print_name();
+		Serial.print(": Stopped due to ");
+		Serial.println(m_state == MS_STOPPED_MOTOR ? "motor." : "detector.");
+		
+		print_name();
+		Serial.println(": Enter new value or -1 to finish.");
+
+		int new_steps = Serial.parseInt();
+		
+		if (new_steps == -1) { break; }
+
+		*p_move_steps = new_steps;
+	}
+
+	print_name();
+	Serial.print(": Finished ");
+	Serial.print(forwards ? "forward " :" backward");
+	Serial.print(" move calibration at ");
+	Serial.print(forwards ? m_move_steps_fwd : m_move_steps_bck);
+	Serial.println(" steps.");
+
+	flush_incoming_serial();
+}
+
+void WordReel::run_interactive_calibration()
+{
+	setup_for_init();
+
+	Serial.println();
+
+	print_name();
+	Serial.println(": Interactive calibration");
+	print_name();
+	Serial.println(": Send a newline ('\\n') to start falling edge calibration");
+
+	flush_incoming_serial();
+	wait_for_newline();
+	interactive_calibrate_edge(true);
+
+	print_name();
+	Serial.println(": Send a newline ('\\n') to start rising edge calibration");
+
+	wait_for_newline();
+	interactive_calibrate_edge(false);
+
+	initial_seek_to_word();
+
+	print_name();
+	Serial.println(": Send a newline ('\\n') to start forward move calibration");
+	
+	wait_for_newline();
+	interactive_calibrate_move(true);
+
+	print_name();
+	Serial.println(": Send a newline ('\\n') to start backward move calibration");
+	
+	wait_for_newline();
+	interactive_calibrate_move(false);
+
+	print_name();
+	Serial.print(": calibration complete. Final values:");
+	Serial.print(m_seek_steps_from_falling_edge);
+	Serial.print(", ");
+	Serial.print(m_seek_steps_from_rising_edge);
+	Serial.print(", ");
+	Serial.print(m_move_steps_fwd);
+	Serial.print(", ");
+	Serial.print(m_move_steps_bck);	
 }
 
 void WordReel::update_detector()

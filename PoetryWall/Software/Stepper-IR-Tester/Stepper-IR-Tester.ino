@@ -14,7 +14,7 @@ static AccelStepper s_motor = AccelStepper(8, 5, 7, 6, 8);
 
 static void print_detector()
 {
-	Serial.println(analogRead(A4));
+	Serial.println(analogRead(A5));
 }
 void setup()
 {
@@ -25,7 +25,7 @@ void setup()
 	long currentPosition = s_motor.currentPosition();
 
 	s_motor.setMaxSpeed(500);
-	s_motor.setSpeed(500);
+	s_motor.setSpeed(200);
 
 	while (currentPosition < STEPS_PER_REV)
 	{
