@@ -2,17 +2,18 @@
 #define _WORD_REEL_H_
 
 #define DETECTOR_TRIGGER_THRESHOLD (500)
+#define DETECTOR_TRIGGER_COUNT_THRESHOLD (30)
 
 /* 
  * STEPS_PER_WORD is the ideal number of steps to move between words
  * From this and NUMBER_OF_WORDS, the steps per word and steps per divison
  * are derived.
  */
-#define STEPS_PER_REV (6230L)
+#define STEPS_PER_REV (6245L)
 #define NUMBER_OF_WORDS (10L)
 
-#define STEPS_PER_WORD (STEPS_PER_REV / (NUMBER_OF_WORDS-1))
-#define STEPS_PER_DIVISION (STEPS_PER_WORD/2)
+#define STEPS_PER_WORD ((STEPS_PER_REV +(NUMBER_OF_WORDS/2))/ NUMBER_OF_WORDS)
+#define STEPS_PER_DIVISION ((STEPS_PER_WORD+1)/2)
 
 typedef void (*ON_MOVE_COMPLETE_CALLBACK)(void);
 
@@ -38,7 +39,7 @@ class WordReel
 {
 public:
 	WordReel(int m1_pin, int m2_pin, int m3_pin, int m4_pin, int detector_pin, int id,
-		int extra_seek_steps_fwd, int extra_seek_steps_bck,
+		int extra_seek_steps_fwd,
 		int extra_move_steps_fwd, int extra_move_steps_bck,
 		bool invert_direction,
 		ON_MOVE_COMPLETE_CALLBACK cb);
@@ -54,7 +55,8 @@ public:
 	void run();
 
 	void update_detector();
-	
+	void update_detector_immediate();
+
 	void off();
 	
 private:
@@ -69,13 +71,15 @@ private:
 	bool m_invert_direction;
 	
 	int m_seek_steps_from_falling_edge;
-	int m_seek_steps_from_rising_edge;
 
 	int m_move_steps_fwd;
 	int m_move_steps_bck;
 
 	char m_pins[4];
 	
+	int m_start_position;
+	int m_trigger_change_count;
+
 	ON_MOVE_COMPLETE_CALLBACK m_callback;
 
 	void set_motor_state(uint8_t new_state);

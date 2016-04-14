@@ -108,8 +108,9 @@ void process_buffer(char const * const buffer)
 	s_last_commanded_direction_fwd = buffer[6] == 'F';
 	
 	#ifdef DEBUG_COMMANDS
-	Serial.print("Sending motor ");
-	Serial.print(s_last_commanded_motor);
+	Serial.print("Motor ");
+	Serial.print(s_last_commanded_motor+1);
+	Serial.print(": moving");
 	Serial.println(s_last_commanded_direction_fwd ? " forwards" : " backwards.");
 	#endif
 

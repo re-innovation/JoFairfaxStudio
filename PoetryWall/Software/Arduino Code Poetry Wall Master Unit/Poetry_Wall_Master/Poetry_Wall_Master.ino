@@ -107,13 +107,13 @@ static int motor2 = 0; // Holds the ID for Motor 2
 static bool s_motors_are_moving = false;
 static unsigned long s_motor_start_time = 0;
 
-// Declare one reel on the master unit
+// Declare reels on the master unit
 static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
   WordReel(
     5, 7, 6, 8,               // Motor pins
     A4,                       // Detector pin
     0,                        // Motor ID
-    560, 205,                  // Forward and backward steps to centre word at setup
+    560,                      // Forward steps to centre word at setup
     200, 30,                  // Forward and backward steps to centre word when running
     true,                     // Invert fwd/back movement sense
     on_master_move_complete_motor1), // Function to call when move is complete
@@ -121,8 +121,8 @@ static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
     9, 11, 10, 12,            // Motor pins
     A5,                       // Detector pin
     1,                        // Motor ID
-    289, 555,                  // Forward and backward steps to centre word at setup
-    -80, -300,                  // Forward and backward steps to centre word when running
+    289,                      // Forward steps to centre word at setup
+    -20, 0,                // Forward and backward steps to centre word when running
     true,                     // Invert fwd/back movement sense
     on_master_move_complete_motor2), // Function to call when move is complete
 };

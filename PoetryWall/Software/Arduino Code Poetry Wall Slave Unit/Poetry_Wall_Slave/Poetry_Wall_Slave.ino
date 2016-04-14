@@ -38,21 +38,20 @@
 static WordReel s_reels[NUMBER_OF_REELS] = {
 	WordReel(
 		5, 7, 6, 8,			// Motor pins
-		A5,					// Detector pin
+		A4,					// Detector pin
 		1,					// Motor ID
-		251, 649, 			// Forward and backward steps to centre word at setup
-		-60, -300, 			// Forward and backward steps to centre word when running
+		40,
+		0, 0, 			// Forward and backward steps to centre word when running
 		true, 				// Invert fwd/back movement sense
-		on_move_complete),	// Function to call when move is complete
-
+		on_move_complete_1),	// Function to call when move is complete
 	WordReel(
 		9, 11, 12, 10,
-		A4,
+		A5,
 		2,
-		640, 49,
-		-340, 280,
+		480,
+		170, 50,
 		false,
-		on_move_complete)
+		on_move_complete_2)
 };
 
 static SoftwareSerial s_serial_cmd(CMD_RX_PIN, CMD_TX_PIN);
@@ -68,9 +67,16 @@ static void send_to_master(char const * str)
 	pinMode(CMD_TX_PIN, INPUT);
 }
 
-static void on_move_complete(void)
+static void on_move_complete_1(void)
 {
-	Serial.println("Move complete!");
+	Serial.println("Motor 1: Move complete!");
+	switch_off_motors();
+	send_to_master("OK");
+}
+
+static void on_move_complete_2(void)
+{
+	Serial.println("Motor 2: Move complete!");
 	switch_off_motors();
 	send_to_master("OK");
 }
@@ -82,12 +88,15 @@ static void debug_task_fn()
 	int i;
 	for (i = 0; i < NUMBER_OF_REELS; i++)
 	{
+		Serial.print("Motor ");
+		Serial.print(i+1);
+		Serial.print(": ");
 		Serial.print(s_reels[i].detectorValue());
 		Serial.println(s_reels[i].isTriggered() ? "(trig)" : "");
 	}
 	#endif
 }
-static TaskAction s_debug_task(debug_task_fn, 1000, INFINITE_TICKS);
+static TaskAction s_debug_task(debug_task_fn, DEBUG_DETECTORS_PERIOD, INFINITE_TICKS);
 
 /* process_any_pending_commands: If a command is pending, process it */
 static void process_any_pending_commands()
@@ -120,6 +129,12 @@ static void read_command_from_serial()
 	while (s_serial_cmd.available())
 	{
 		char new_char = s_serial_cmd.read();
+		command_add_char(new_char);
+	}
+
+	while (Serial.available())
+	{
+		char new_char = Serial.read();
 		command_add_char(new_char);
 	}
 }
