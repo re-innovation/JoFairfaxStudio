@@ -312,20 +312,20 @@ void loop() {
   // ********** SENSOR READS ************************************ //
   // This is always within the loop
   
-//  //***** UltraSonic Distance Sensor **********//
-//  // This sction of code reads the ultrasonic distance sensor delay
-//  for(int i = 0; i<=5; i++)
-//  {
-//    digitalWrite(trigPin, LOW);  // Added this line
-//    delayMicroseconds(2); // Added this line
-//    digitalWrite(trigPin, HIGH);
-//    delayMicroseconds(1000); // Added this line
-//    digitalWrite(trigPin, LOW);
-//    duration = pulseIn(echoPin, HIGH);
-//    distance += (duration/2) / 29.1;
-//    delay(2);
-//  }
-//  distance = distance/5;  // Averaging
+  //***** UltraSonic Distance Sensor **********//
+  // This sction of code reads the ultrasonic distance sensor delay
+  for(int i = 0; i<=5; i++)
+  {
+    digitalWrite(trigPin, LOW);  // Added this line
+    delayMicroseconds(2); // Added this line
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(1000); // Added this line
+    digitalWrite(trigPin, LOW);
+    duration = pulseIn(echoPin, HIGH);
+    distance += (duration/2) / 29.1;
+    delay(2);
+  }
+  distance = distance/5;  // Averaging
   
   
 

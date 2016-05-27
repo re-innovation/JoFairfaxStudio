@@ -22,14 +22,15 @@
 #include "debug_config.h"
 #include "word_reel.h"
 #include "commands.h"
+#include "slave_config.h"
 
 /*
  * Defines
  */
 
-#define SLAVE_UNIT_ID "00"
-
-#define NUMBER_OF_REELS (2)
+//#define SLAVE_UNIT_ID "00"
+//
+//#define NUMBER_OF_REELS (2)
 
 #define CMD_RX_PIN (3)
 #define CMD_TX_PIN (4)
@@ -50,7 +51,7 @@ static WordReel s_reels[NUMBER_OF_REELS] = {
 
 	WordReel(
 		9, 11, 12, 10,
-		A0,
+		A5,
 		2,
 		150, 240,
 		30, 70,

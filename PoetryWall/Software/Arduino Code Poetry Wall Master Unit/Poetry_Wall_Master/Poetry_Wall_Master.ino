@@ -67,8 +67,8 @@
 #define TRIG_PIN A2  //  The connections for the ultrasonic distance sensor
 #define ECHO_PIN A1
 
-#define NUMBER_OF_MASTER_REELS (1)
-#define NUMBER_OF_SLAVE_REELS (2)
+#define NUMBER_OF_MASTER_REELS (2)
+#define NUMBER_OF_SLAVE_REELS (10)
 
 #define NUMBER_OF_REELS_TOTAL (NUMBER_OF_MASTER_REELS + NUMBER_OF_SLAVE_REELS)
 
@@ -96,6 +96,15 @@ static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
     30, 170,                  // Forward and backward steps to centre word when running
     true,                     // Invert fwd/back movement sense
     on_master_move_complete), // Function to call when move is complete
+
+  WordReel(
+    9, 11, 12, 10,
+    A5,
+    1,
+    150, 240,
+    30, 70,
+    false,
+    on_master_move_complete),
 };
 
 static SoftwareSerial s_serial_cmd(CMD_RX_PIN, CMD_TX_PIN);
@@ -108,15 +117,31 @@ static bool s_wait = false;
 // Each reel is associated with a two-digit unit ID.
 // This array maps between reels and unit ID
 static char reel_to_unit_id_map[NUMBER_OF_SLAVE_REELS][3] = {
-  "00", // Reel 1 is on slave 00
-  "00",  // Reel 2 is on slave 00
+  "00", // Reel 2 is on slave 00
+  "00", // Reel 3 is on slave 00
+  "01", // Reel 4 is on slave 00
+  "01", // Reel 5 is on slave 00
+  "02", // Reel 6 is on slave 00
+  "02", // Reel 7 is on slave 00
+  "03", // Reel 8 is on slave 00
+  "03", // Reel 9 is on slave 00
+  "04", // Reel 10 is on slave 00
+  "04" // Reel 11 is on slave 00        
 };
 
 // Each reel is associated with two-digit motor ID.
 // This array maps between reels and motor ID
 static char reel_to_motor_id_map[NUMBER_OF_SLAVE_REELS][3] = {
-  "01", // Slave 1, reel 1
-  "02"  // Slave 1, reel 2
+  "01", // Slave 00, reel 1
+  "02",  // Slave 00, reel 2
+  "01", // Slave 01, reel 1
+  "02",  // Slave 01, reel 2
+  "01", // Slave 02, reel 1
+  "02",  // Slave 02, reel 2
+  "01", // Slave 03, reel 1
+  "02",  // Slave 04, reel 2
+  "01", // Slave 05, reel 1
+  "02"  // Slave 05, reel 2        
 };
 
 // ********************* END OF USER VARIABLES***************************

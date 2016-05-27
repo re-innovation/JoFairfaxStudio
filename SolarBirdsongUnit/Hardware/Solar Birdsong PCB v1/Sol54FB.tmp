@@ -1,4 +1,4 @@
-update=04/04/2016 20:41:46
+update=17/05/2016 17:36:05
 last_client=kicad
 [cvpcb]
 version=1
@@ -84,3 +84,13 @@ LibName33=arduino
 LibName34=w_connectors
 LibName35=freetronics_schematic
 LibName36=D:/Google Drive/KiCAD/KiCad My Libraries/matts_components
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60
