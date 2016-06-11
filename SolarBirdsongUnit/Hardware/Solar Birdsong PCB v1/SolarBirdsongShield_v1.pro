@@ -1,49 +1,32 @@
-update=04/04/2016 20:41:46
+update=06/06/2016 21:31:58
+version=1
 last_client=kicad
+[general]
+version=1
+RootSch=
+BoardNm=
+[pcbnew]
+version=1
+LastNetListRead=
+UseCmpFile=1
+PadDrill=0.600000000000
+PadDrillOvalY=0.600000000000
+PadSizeH=1.500000000000
+PadSizeV=1.500000000000
+PcbTextSizeV=1.500000000000
+PcbTextSizeH=1.500000000000
+PcbTextThickness=0.300000000000
+ModuleTextSizeV=1.000000000000
+ModuleTextSizeH=1.000000000000
+ModuleTextSizeThickness=0.150000000000
+SolderMaskClearance=0.000000000000
+SolderMaskMinWidth=0.000000000000
+DrawSegmentWidth=0.200000000000
+BoardOutlineThickness=0.100000000000
+ModuleOutlineThickness=0.150000000000
 [cvpcb]
 version=1
 NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
-[pcbnew]
-version=1
-LastNetListRead=StepperMotorController_12_v2.net
-UseCmpFile=1
-PadDrill=0.000000000000
-PadDrillOvalY=0.000000000000
-PadSizeH=1.000000000000
-PadSizeV=1.500000000000
-PcbTextSizeV=2.032000000000
-PcbTextSizeH=1.524000000000
-PcbTextThickness=0.304800000000
-ModuleTextSizeV=1.524000000000
-ModuleTextSizeH=1.524000000000
-ModuleTextSizeThickness=0.304800000000
-SolderMaskClearance=0.254000000000
-SolderMaskMinWidth=0.000000000000
-DrawSegmentWidth=0.381000000000
-BoardOutlineThickness=0.381000000000
-ModuleOutlineThickness=0.381000000000
-[pcbnew/libraries]
-LibDir=../../../../../KiCAD/KiCad My Modules
-LibName1=sockets
-LibName2=connect
-LibName3=discret
-LibName4=pin_array
-LibName5=divers
-LibName6=libcms
-LibName7=display
-LibName8=valves
-LibName9=led
-LibName10=dip_sockets
-LibName11=matts_components
-LibName12=matts_lib
-LibName13=logo module/reinnovation_logo_15mm
-LibName14=logo module/OSHW_logo_small_back
-LibName15=ref-packages
-LibName16=w_connectors
-[general]
-version=1
 [eeschema]
 version=1
 LibDir=../../../../../../KiCAD/KiCad My Libraries
@@ -79,8 +62,3 @@ LibName28=atmel
 LibName29=contrib
 LibName30=valves
 LibName31=matts_components
-LibName32=uln-udn
-LibName33=arduino
-LibName34=w_connectors
-LibName35=freetronics_schematic
-LibName36=D:/Google Drive/KiCAD/KiCad My Libraries/matts_components

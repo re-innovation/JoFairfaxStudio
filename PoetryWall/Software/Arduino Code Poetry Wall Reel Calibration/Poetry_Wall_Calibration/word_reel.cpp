@@ -6,7 +6,7 @@
 #include "word_reel.h"
 
 WordReel::WordReel(int m1_pin, int m2_pin, int m3_pin, int m4_pin, int detector_pin, int id,
-	int extra_seek_steps_falling_edge,
+	int extra_seek_steps_falling_edge, int extra_seek_steps_rising_edge,
 	int extra_move_steps_fwd, int extra_move_steps_bck,
 	bool invert_direction,
 	ON_MOVE_COMPLETE_CALLBACK cb)
@@ -20,6 +20,7 @@ WordReel::WordReel(int m1_pin, int m2_pin, int m3_pin, int m4_pin, int detector_
 	m_invert_direction = invert_direction;
 
 	m_seek_steps_from_falling_edge = extra_seek_steps_falling_edge;
+	m_seek_steps_from_rising_edge = extra_seek_steps_rising_edge;
 
 	m_move_steps_fwd = extra_move_steps_fwd;
 	m_move_steps_bck = extra_move_steps_bck;
@@ -29,10 +30,7 @@ WordReel::WordReel(int m1_pin, int m2_pin, int m3_pin, int m4_pin, int detector_
 	m_pins[2] = m3_pin;
 	m_pins[3] = m4_pin;
 
-	m_trigger_change_count = 0;
-	
 	m_callback = cb;
-
 	pinMode(detector_pin, INPUT);
 }
 
@@ -64,10 +62,6 @@ void WordReel::handle_move_to_first_edge()
 	// Wait for the detector to un-trigger from old position
 	if (!m_detector_triggered)
 	{
-		#ifdef DEBUG_MOTORS
-		print_name();
-		Serial.println(": detriggered.");
-		#endif
 		set_motor_state(MS_MOVING_TO_SECOND_EDGE);
 	}
 	else if (!m_running)
@@ -89,10 +83,6 @@ void WordReel::handle_move_to_second_edge()
 	}				
 	else
 	{
-		#ifdef DEBUG_MOTORS
-		print_name();
-		Serial.println(": finished motor stepping before trigger.");
-		#endif
 		set_motor_state(MS_STOPPED_MOTOR);
 	}
 }
@@ -108,7 +98,6 @@ void WordReel::handle_stopping()
 void WordReel::move_one_word(bool direction_is_forwards)
 {
 	m_direction_forwards = direction_is_forwards;
-	m_start_position = m_motor->currentPosition();
 
 	if (m_invert_direction) { m_direction_forwards = !m_direction_forwards; }
 
@@ -125,26 +114,6 @@ void WordReel::move_one_word(bool direction_is_forwards)
 
 void WordReel::set_stop_target()
 {
-	int steps_moved_to_this_point = m_motor->currentPosition() - m_start_position;
-/*	if (abs(steps_moved_to_this_point) < ((STEPS_PER_WORD * 50L) / 100L))
-	{
-		#ifdef DEBUG_MOTORS
-		print_name();
-		Serial.print(": Detection failed at ");
-		Serial.print(steps_moved_to_this_point);
-		Serial.println(" steps. Stopping on dead-reckoning.");
-		#endif
-		return;
-	}*/
-
-	#ifdef DEBUG_MOTORS
-	print_name();
-	Serial.print(": Stopping. Moved ");
-	Serial.print(steps_moved_to_this_point);
-	Serial.print(" steps. Distance to go: ");
-	Serial.println(m_motor->distanceToGo());
-	#endif
-
 	// Set the motor stop steps based on direction
 	if (m_direction_forwards)
 	{
@@ -192,7 +161,7 @@ bool WordReel::move_until_trigger_changed(float speed)
 {
 	bool start_trigger;
 
-	update_detector_immediate();
+	update_detector();
 
 	start_trigger = m_detector_triggered;
 
@@ -200,15 +169,14 @@ bool WordReel::move_until_trigger_changed(float speed)
 	
 	do
 	{
-		update_detector_immediate();
+		update_detector();
 		if (m_motor->runSpeed())
 		{
 			#ifdef DEBUG_DETECTORS
 			print_name();
 			Serial.print(" :");
 			Serial.print(detectorValue());
-			Serial.print(isTriggered() ? " (trig) " : " ");
-			Serial.println(m_trigger_change_count);
+			Serial.println(isTriggered() ? " (trig)" : "");
 			#endif
 		}
 	} while (m_detector_triggered == start_trigger);
@@ -248,32 +216,25 @@ void WordReel::initial_seek_to_word()
 	
 	#ifdef DEBUG_MOTORS
 	print_name();
-	Serial.print(": Found first edge");
-	Serial.print(first_edge_was_falling ? " (falling)" : "(rising)");
-	Serial.println(".");
+	Serial.print(": Found first edge. Moving to centre (");
+	Serial.print(first_edge_was_falling ? "FWD" : "BCK");
+	Serial.println(").");
 	#endif
 
 	m_motor->setCurrentPosition(0);
 
 	// Then move to centre the word
-	if (!first_edge_was_falling)
+	if (first_edge_was_falling)
 	{
-		// Move to a falling edge
-		#ifdef DEBUG_MOTORS
-		print_name();
-		Serial.println(": Moving to falling edge.");
-		#endif
-		move_until_trigger_changed(100);
-	}
-	
-	#ifdef DEBUG_MOTORS
-	print_name();
-	Serial.print(": Moving ");
-	Serial.print(m_seek_steps_from_falling_edge);
-	Serial.println(" steps to centre word.");
-	#endif
+		// Reel just triggered, move forwards to centre
+		m_motor->moveTo(m_seek_steps_from_falling_edge);
 
-	m_motor->move(m_seek_steps_from_falling_edge);
+	}
+	else
+	{	
+		// Reel just untriggered, move fowards to centre
+		m_motor->moveTo(m_seek_steps_from_rising_edge);
+	}
 
 	m_motor->setSpeed(100);
 
@@ -342,7 +303,7 @@ void WordReel::interactive_calibrate_edge(bool falling)
 	}
 	else
 	{
-		//m_seek_steps_from_rising_edge = m_motor->currentPosition();	
+		m_seek_steps_from_rising_edge = m_motor->currentPosition();	
 	}
 }
 
@@ -367,7 +328,7 @@ void WordReel::interactive_calibrate_move(bool forwards)
 
 		do
 		{
-			update_detector_immediate();
+			update_detector();
 			run();
 		} while(m_running);
 
@@ -434,37 +395,17 @@ void WordReel::run_interactive_calibration()
 	Serial.print(": calibration complete. Final values:");
 	Serial.print(m_seek_steps_from_falling_edge);
 	Serial.print(", ");
-//	Serial.print(m_seek_steps_from_rising_edge);
-//	Serial.print(", ");
+	Serial.print(m_seek_steps_from_rising_edge);
+	Serial.print(", ");
 	Serial.print(m_move_steps_fwd);
 	Serial.print(", ");
 	Serial.print(m_move_steps_bck);	
 }
 
-void WordReel::update_detector_immediate()
-{
-	m_last_detector_value = analogRead(m_detector_pin);
-	m_detector_triggered = m_last_detector_value < DETECTOR_TRIGGER_THRESHOLD;
-}
-
 void WordReel::update_detector()
 {
 	m_last_detector_value = analogRead(m_detector_pin);
-	bool this_reading_triggered = m_last_detector_value < DETECTOR_TRIGGER_THRESHOLD;
-	
-	if (this_reading_triggered != m_detector_triggered)
-	{
-		m_trigger_change_count++;
-	}
-	else
-	{
-		m_trigger_change_count = 0;
-	}
-
-	if (m_trigger_change_count > DETECTOR_TRIGGER_COUNT_THRESHOLD)
-	{
-		m_detector_triggered = this_reading_triggered;	
-	}
+	m_detector_triggered = m_last_detector_value < DETECTOR_TRIGGER_THRESHOLD;
 }
 
 void WordReel::off()

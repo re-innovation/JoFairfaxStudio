@@ -55,6 +55,7 @@
 
   This example code is in the public domain.
  */
+
 #include <EEPROM.h>        // For writing values to the EEPROM
 #include <avr/eeprom.h>
 
@@ -64,18 +65,39 @@
 #include "debug_config.h"
 #include "word_reel.h"
 
+/*****************************************************/
+/*****************************************************/
+/************* User Configurable Options *************/
+/*****************************************************/
+/*****************************************************/
+
+// This set how many reels will move each time the sensor is triggered
+#define REELS_TO_MOVE_PER_TRIGGER (10)
+
+// Minimum and maximum distances for triggering the sensor (in cm)
+#define MINIMUM_TRIGGER_DISTANCE_CM (5)
+#define MAXIMUM_TRIGGER_DISTANCE_CM (15)
+
+// How long to wait before on the sensor again after moving (in seconds)
+#define MINIMUM_DELAY_BETWEEN_TRIGGERS_IN_SECONDS (10)
+
+/*****************************************************/
+/*****************************************************/
+/********** END of user configurable options *********/
+/*****************************************************/
+/*****************************************************/
+
 #define TRIG_PIN A2  //  The connections for the ultrasonic distance sensor
 #define ECHO_PIN A1
 
 #define NUMBER_OF_MASTER_REELS (2)
+<<<<<<< HEAD
 #define NUMBER_OF_SLAVE_REELS (10)
+=======
+#define NUMBER_OF_SLAVE_REELS (8)
+>>>>>>> origin/master
 
 #define NUMBER_OF_REELS_TOTAL (NUMBER_OF_MASTER_REELS + NUMBER_OF_SLAVE_REELS)
-
-#define WHEELS_TO_MOVE_PER_TRIGGER (2)
-
-#define MINIMUM_TRIGGER_DISTANCE 5
-#define MAXIMUM_TRIGGER_DISTANCE 15
 
 #define RESET_PIN (2)
 #define CMD_RX_PIN (3)
@@ -86,15 +108,27 @@
 static int motor1 = 0; // Holds the ID for Motor 1
 static int motor2 = 0; // Holds the ID for Motor 2
 
-// Declare one reel on the master unit
+static bool s_motors_are_moving = false;
+static unsigned long s_motor_start_time = 0;
+
+// Declare reels on the master unit
 static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
   WordReel(
     5, 7, 6, 8,               // Motor pins
     A4,                       // Detector pin
     0,                        // Motor ID
-    50, 250,                  // Forward and backward steps to centre word at setup
-    30, 170,                  // Forward and backward steps to centre word when running
+    560,                      // Forward steps to centre word at setup
+    200, 30,                  // Forward and backward steps to centre word when running
     true,                     // Invert fwd/back movement sense
+    on_master_move_complete_motor1), // Function to call when move is complete
+  WordReel(
+    9, 11, 10, 12,            // Motor pins
+    A5,                       // Detector pin
+    1,                        // Motor ID
+    289,                      // Forward steps to centre word at setup
+    -20, 0,                // Forward and backward steps to centre word when running
+    true,                     // Invert fwd/back movement sense
+<<<<<<< HEAD
     on_master_move_complete), // Function to call when move is complete
 
   WordReel(
@@ -105,11 +139,11 @@ static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
     30, 70,
     false,
     on_master_move_complete),
+=======
+    on_master_move_complete_motor2), // Function to call when move is complete
+>>>>>>> origin/master
 };
-
 static SoftwareSerial s_serial_cmd(CMD_RX_PIN, CMD_TX_PIN);
-
-static bool s_wait = false;
 
 // ****************USER VARIABLES****************************************
 // **********************************************************************
@@ -117,6 +151,7 @@ static bool s_wait = false;
 // Each reel is associated with a two-digit unit ID.
 // This array maps between reels and unit ID
 static char reel_to_unit_id_map[NUMBER_OF_SLAVE_REELS][3] = {
+<<<<<<< HEAD
   "00", // Reel 2 is on slave 00
   "00", // Reel 3 is on slave 00
   "01", // Reel 4 is on slave 00
@@ -127,6 +162,16 @@ static char reel_to_unit_id_map[NUMBER_OF_SLAVE_REELS][3] = {
   "03", // Reel 9 is on slave 00
   "04", // Reel 10 is on slave 00
   "04" // Reel 11 is on slave 00        
+=======
+  "00", // Reel 1 is on slave 00
+  "00",  // Reel 2 is on slave 00
+  "01", // Reel 1 is on slave 01
+  "01",  // Reel 2 is on slave 01
+  "02", // Reel 1 is on slave 02
+  "02",  // Reel 2 is on slave 02
+  "03", // Reel 1 is on slave 03
+  "03",  // Reel 2 is on slave 03
+>>>>>>> origin/master
 };
 
 // Each reel is associated with two-digit motor ID.
@@ -140,8 +185,11 @@ static char reel_to_motor_id_map[NUMBER_OF_SLAVE_REELS][3] = {
   "02",  // Slave 02, reel 2
   "01", // Slave 03, reel 1
   "02",  // Slave 04, reel 2
+<<<<<<< HEAD
   "01", // Slave 05, reel 1
   "02"  // Slave 05, reel 2        
+=======
+>>>>>>> origin/master
 };
 
 // ********************* END OF USER VARIABLES***************************
@@ -149,155 +197,140 @@ static char reel_to_motor_id_map[NUMBER_OF_SLAVE_REELS][3] = {
 
 static int get_ultrasonic_distance()
 {
-  int distance = 0;
-  unsigned long duration;
-
-  // This section of code reads the ultrasonic distance sensor delay
-  for(int i = 0; i<=10; i++)
-  {
-    digitalWrite(TRIG_PIN, LOW);  // Added this line
-    delayMicroseconds(2); // Added this line
+    unsigned long duration;
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
     digitalWrite(TRIG_PIN, HIGH);
-    delayMicroseconds(1000); // Added this line
+    delayMicroseconds(1000);
     digitalWrite(TRIG_PIN, LOW);
     duration = pulseIn(ECHO_PIN, HIGH, 500000);
-    distance += (duration/2) / 29.1;
-    delay(2);
-  }
-  distance = distance/10;  // Averaging
+    return (duration/2) / 29.1;
+}
 
-  #ifdef DEBUG_ULTRASONIC
-    Serial.print("Ultrasonic:");
-    Serial.print(distance);
-    Serial.println(" cm");  
-  #endif
+static int get_ultrasonic_average_distance(int n)
+{
+    int distance = 0;
 
-  return distance;
+    // This section of code reads the ultrasonic distance sensor delay
+    for(int i = 0; i<n; i++)
+    {
+        distance += get_ultrasonic_distance();
+        delay(2);
+    }
+    distance = distance/n;  // Averaging
+
+    #ifdef DEBUG_ULTRASONIC
+      Serial.print("Ultrasonic:");
+      Serial.print(distance);
+      Serial.println(" cm");  
+    #endif
+
+    return distance;
 }
 
 static char reel_direction_is_forwards(int reel)
 {
-  return (reel % 2) == 0;
+    return (reel % 2) == 0;
 }
 
 static char * make_new_command(int reel)
 {
-  static char commandBuffer[13];
+    static char commandBuffer[13];
 
-  commandBuffer[0] = 'a'; // Commands always start with 'a';
+    commandBuffer[0] = 'a'; // Commands always start with 'a';
 
-  // Convert from master reel number to slave reel number
-  reel -= NUMBER_OF_MASTER_REELS;
+    // Convert from master reel number to slave reel number
+    reel -= NUMBER_OF_MASTER_REELS;
 
-  // Map reel number to unit ID
-  commandBuffer[1] = reel_to_unit_id_map[reel][0];
-  commandBuffer[2] = reel_to_unit_id_map[reel][1];
+    // Map reel number to unit ID
+    commandBuffer[1] = reel_to_unit_id_map[reel][0];
+    commandBuffer[2] = reel_to_unit_id_map[reel][1];
 
-  commandBuffer[3] = 'M';
+    commandBuffer[3] = 'M';
 
-  commandBuffer[4] = reel_to_motor_id_map[reel][0];
-  commandBuffer[5] = reel_to_motor_id_map[reel][1];
+    commandBuffer[4] = reel_to_motor_id_map[reel][0];
+    commandBuffer[5] = reel_to_motor_id_map[reel][1];
 
-  commandBuffer[6] = reel_direction_is_forwards(reel) ? 'F' : 'B';
+    commandBuffer[6] = reel_direction_is_forwards(reel) ? 'F' : 'B';
 
-  strncpy(&commandBuffer[7], "-----", 5);
-  commandBuffer[12] = '\0';
-  
-  commandBuffer[12] = '\0';
+    strncpy(&commandBuffer[7], "-----", 5);
+    commandBuffer[12] = '\0';
+    
+    commandBuffer[12] = '\0';
 
-  return commandBuffer;
+    return commandBuffer;
 }
 
 static void run_motors()
 {
-  uint8_t i;
-  
-  for (i = 0; i < NUMBER_OF_MASTER_REELS; i++)
-  {
-    s_reels[i].update_detector();
-    s_reels[i].run();
-  }
-}
-
-static void read_software_serial_blocking(int expected)
-{
-
-  // Block until data available.
-  while(s_serial_cmd.available()<expected);
-  
-  #ifdef ECHO_SERIAL_INPUT
-
-  String serialInput;
-  
-  if(s_serial_cmd.available()>= expected)
-  {
-    for (int i=0;i<expected;i++)
+    uint8_t i;
+    
+    for (i = 0; i < NUMBER_OF_MASTER_REELS; i++)
     {
-      serialInput += (char)s_serial_cmd.read();    
-    } 
-    Serial.println(serialInput);
-  }
-  #endif
+      s_reels[i].update_detector();
+      s_reels[i].run();
+    }
+
+    if ((millis() - s_motor_start_time) > (MINIMUM_DELAY_BETWEEN_TRIGGERS_IN_SECONDS * 1000UL))
+    {
+        s_motors_are_moving = false;
+    }
 }
 
 static bool reel_is_on_master(int reel)
 {
-  return (reel < NUMBER_OF_MASTER_REELS);
+    return (reel < NUMBER_OF_MASTER_REELS);
 }
 
 static void move_master_reel(int reel)
 {
-  s_wait = true;
-
-  bool forwards = reel_direction_is_forwards(reel);
-  s_reels[reel].move_one_word(forwards);
-
-  while(s_wait) {
-    run_motors();
-  }
+    bool forwards = reel_direction_is_forwards(reel);
+    s_reels[reel].move_one_word(forwards);
 }
 
-static void on_master_move_complete()
+static void on_master_move_complete_motor1()
 {
-  s_wait = false;
+    s_reels[0].off();
+}
+
+static void on_master_move_complete_motor2()
+{
+    s_reels[1].off();
 }
 
 static void move_slave_reel(int reel)
 {
-  char * cmd = make_new_command(reel);
+    char * cmd = make_new_command(reel);
 
-  #ifdef DEBUG_REEL_SELECTION
-  Serial.print("Sending ");
-  Serial.println(cmd);
-  #endif
+    #ifdef DEBUG_REEL_SELECTION
+    Serial.print("Sending ");
+    Serial.println(cmd);
+    #endif
 
-  s_serial_cmd.println(cmd); 
-  s_serial_cmd.flush();
-
-  // Expect two characters back from slave
-  read_software_serial_blocking(2);
+    s_serial_cmd.println(cmd); 
+    s_serial_cmd.flush();
 }
 
 static void create_random_number_array(int * pRandArray)
 {
     for (int i=0;i<NUMBER_OF_REELS_TOTAL;i++)
     {    
-      // Here we want to check if its the same as any previous numbers
-      bool same;
-      do
-      {
-        same = false;
-        pRandArray[i] = random(0, NUMBER_OF_REELS_TOTAL);
-        for(int y=0;y<i;y++)
+        // Here we want to check if its the same as any previous numbers
+        bool same;
+        do
         {
-          same = same || (pRandArray[y] == pRandArray[i]);
-        }
-      } while(same);
+          same = false;
+          pRandArray[i] = random(0, NUMBER_OF_REELS_TOTAL);
+          for(int y=0;y<i;y++)
+          {
+            same = same || (pRandArray[y] == pRandArray[i]);
+          }
+        } while(same);
 
-      #ifdef DEBUG_REEL_SELECTION
-      Serial.print(pRandArray[i]);
-      Serial.print(" ");
-      #endif
+        #ifdef DEBUG_REEL_SELECTION
+        Serial.print(pRandArray[i]);
+        Serial.print(" ");
+        #endif
     }
     
     #ifdef DEBUG_REEL_SELECTION
@@ -307,39 +340,41 @@ static void create_random_number_array(int * pRandArray)
 
 static bool switch_is_pressed()
 {
-  return digitalRead(RESET_PIN)==LOW;
+    return digitalRead(RESET_PIN)==LOW;
 }
 
 static bool distance_within_limits(int distance)
 {
-  return ((distance <= MAXIMUM_TRIGGER_DISTANCE) && (distance >= MINIMUM_TRIGGER_DISTANCE));
+    return ((distance <= MAXIMUM_TRIGGER_DISTANCE_CM) && (distance >= MINIMUM_TRIGGER_DISTANCE_CM));
 }
 
 #ifdef DEBUG_TRIGGER_STATE
 static void debug_trigger_state(char trigger_state)
 {
+    Serial.println("");
     Serial.print("Triggered from  ");
     switch (trigger_state)
     {
     case 1:
-      Serial.println("switch.");
-      break;
+        Serial.println("switch.");
+        break;
     case 2:
-      Serial.println("distance.");
-      break;
+        Serial.println("distance.");
+        break;
     case 3:
-      Serial.println("both.");
-      break;
+        Serial.println("both.");
+        break;
     }
 }
 #endif
 
 static void trigger_reels_from_array(int * pRandArray)
 {
-  for(int z=0; z<WHEELS_TO_MOVE_PER_TRIGGER; z++)
+  for(int z=0; z<REELS_TO_MOVE_PER_TRIGGER; z++)
   {
     int reelNumber = pRandArray[z];
 
+    #ifdef DEBUG_FLASH_MOTOR_NUMBER_ON_LED
     for (int j = 0; j < reelNumber; j++)
     {
         digitalWrite(LED_PIN, LOW);
@@ -348,7 +383,8 @@ static void trigger_reels_from_array(int * pRandArray)
         delay(100);
     }
     digitalWrite(LED_PIN, LOW);
-        
+    #endif
+
     #ifdef DEBUG_REEL_SELECTION
     Serial.print("Moving reel ");
     Serial.print(reelNumber);
@@ -374,13 +410,19 @@ static void trigger_reels_from_array(int * pRandArray)
 
 static char get_trigger_state()
 {
-  int distance = get_ultrasonic_distance();
+  int distance = get_ultrasonic_average_distance(10);
   char trigger_state = 0;
 
   trigger_state += switch_is_pressed() ? 1 : 0;
   trigger_state += distance_within_limits(distance) ? 2 : 0;
 
   return trigger_state;
+}
+
+static void set_motors_moving()
+{
+  s_motors_are_moving = true;
+  s_motor_start_time = millis();
 }
 
 static void process_trigger_state(char trigger_state)
@@ -396,6 +438,8 @@ static void process_trigger_state(char trigger_state)
     create_random_number_array(randArray);
 
     trigger_reels_from_array(randArray);
+
+    set_motors_moving();
   }
 }
 
@@ -419,6 +463,7 @@ void setup() {
   for (i = 0; i < NUMBER_OF_MASTER_REELS; i++)
   {
     s_reels[i].initial_seek_to_word();
+    s_reels[i].off();
   }
 
   // Retrieve the setpoints from EEPROM
@@ -430,27 +475,17 @@ void setup() {
   Serial.print("Motor2 ID:");
   Serial.println(motor2);  
   #endif
-
-  switch_off_motors();
-
 }//--(end setup )---
 
 void loop() {
 
-  int trigger_state = get_trigger_state();
-  
-  process_trigger_state(trigger_state);
-
-  run_motors();
-
-}
-
-void switch_off_motors()
-{
-
-  int i;
-  for (i = 0; i < NUMBER_OF_MASTER_REELS; i++)
+  if (s_motors_are_moving)
   {
-    s_reels[i].off();
+      run_motors();
+  }
+  else
+  {
+    int trigger_state = get_trigger_state();
+    process_trigger_state(trigger_state);
   }
 }
