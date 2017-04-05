@@ -2,7 +2,7 @@
 // Player software & supporting hardware (c) 2014 vwlowen.co.uk 
 
 
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>z
 #include <EEPROM.h>
 
 #define rxPin 10                             // Software Serial Rx from MP3 Module Tx pin.
@@ -17,7 +17,7 @@
 #define cmdSetEq      0x07                  // Set Equalizer to a specified value.
 #define cmdReset      0x0c                  // Reset MP3 Module.
 
-#define powerControl  5
+#define powerControl  3
 
 int savedVolume = 0;                        // EEPROM locations for saving current volume 
 int savedEq = 2;                            // and equalizer values.
@@ -157,6 +157,6 @@ void loop() {
    delay(100);
    digitalWrite(powerControl, LOW);
    digitalWrite(pinLED, LOW);   
-   delay(5000);
+   delay(2000);
 }  
 

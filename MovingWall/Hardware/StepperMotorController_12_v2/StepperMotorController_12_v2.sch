@@ -28,10 +28,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:matts_components
-LIBS:uln-udn
-LIBS:arduino
-LIBS:w_connectors
 LIBS:StepperMotorController_12_v2-cache
 EELAYER 25 0
 EELAYER END
@@ -62,7 +58,7 @@ F5 "STEP_IN4" I L 8800 2300 60
 F6 "STEP_V+" I L 8800 1800 60 
 $EndSheet
 $Comp
-L R R3
+L R-RESCUE-StepperMotorController_12_v2 R3
 U 1 1 551B2385
 P 8150 3200
 F 0 "R3" V 8230 3200 40  0000 C CNN
@@ -81,7 +77,7 @@ F 11 "Value" H 8150 3200 60  0001 C CNN "Supplier 2 Part No"
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D3
+L LED-RESCUE-StepperMotorController_12_v2 D3
 U 1 1 551B23C1
 P 8150 2650
 F 0 "D3" H 8150 2750 50  0000 C CNN
@@ -100,7 +96,7 @@ F 11 "Value" H 8150 2650 60  0001 C CNN "Supplier 2 Part No"
 	0    1    1    0   
 $EndComp
 $Comp
-L R R1
+L R-RESCUE-StepperMotorController_12_v2 R1
 U 1 1 551B24DC
 P 7950 3200
 F 0 "R1" V 8030 3200 40  0000 C CNN
@@ -119,7 +115,7 @@ F 11 "Value" H 7950 3200 60  0001 C CNN "Supplier 2 Part No"
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D1
+L LED-RESCUE-StepperMotorController_12_v2 D1
 U 1 1 551B24E2
 P 7950 2650
 F 0 "D1" H 7950 2750 50  0000 C CNN
@@ -138,7 +134,7 @@ F 11 "Value" H 7950 2650 60  0001 C CNN "Supplier 2 Part No"
 	0    1    1    0   
 $EndComp
 $Comp
-L R R7
+L R-RESCUE-StepperMotorController_12_v2 R7
 U 1 1 551B2506
 P 8550 3200
 F 0 "R7" V 8630 3200 40  0000 C CNN
@@ -157,7 +153,7 @@ F 11 "Value" H 8550 3200 60  0001 C CNN "Supplier 2 Part No"
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D7
+L LED-RESCUE-StepperMotorController_12_v2 D7
 U 1 1 551B250C
 P 8550 2650
 F 0 "D7" H 8550 2750 50  0000 C CNN
@@ -176,7 +172,7 @@ F 11 "Value" H 8550 2650 60  0001 C CNN "Supplier 2 Part No"
 	0    1    1    0   
 $EndComp
 $Comp
-L R R5
+L R-RESCUE-StepperMotorController_12_v2 R5
 U 1 1 551B2512
 P 8350 3200
 F 0 "R5" V 8430 3200 40  0000 C CNN
@@ -195,7 +191,7 @@ F 11 "Value" H 8350 3200 60  0001 C CNN "Supplier 2 Part No"
 	1    0    0    -1  
 $EndComp
 $Comp
-L LED D5
+L LED-RESCUE-StepperMotorController_12_v2 D5
 U 1 1 551B2518
 P 8350 2650
 F 0 "D5" H 8350 2750 50  0000 C CNN
@@ -214,7 +210,7 @@ F 11 "Value" H 8350 2650 60  0001 C CNN "Supplier 2 Part No"
 	0    1    1    0   
 $EndComp
 $Comp
-L GND #PWR01
+L GND-RESCUE-StepperMotorController_12_v2 #PWR01
 U 1 1 551B255D
 P 8250 3600
 F 0 "#PWR01" H 8250 3600 30  0001 C CNN
@@ -235,7 +231,7 @@ F4 "V_SUPPLY_GND" I L 2900 2150 60
 F5 "V_REG_GND" O R 4050 2300 60 
 $EndSheet
 $Comp
-L CP1 C3
+L CP1-RESCUE-StepperMotorController_12_v2 C3
 U 1 1 551B33BA
 P 6150 3200
 F 0 "C3" H 6200 3300 50  0000 L CNN
@@ -276,7 +272,7 @@ F 3 "" H 5000 5300 60  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L GND #PWR02
+L GND-RESCUE-StepperMotorController_12_v2 #PWR02
 U 1 1 551B3CAB
 P 4300 2550
 F 0 "#PWR02" H 4300 2550 30  0001 C CNN
@@ -287,7 +283,7 @@ F 3 "" H 4300 2550 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR03
+L GND-RESCUE-StepperMotorController_12_v2 #PWR03
 U 1 1 551B457F
 P 5500 5650
 F 0 "#PWR03" H 5500 5650 30  0001 C CNN
@@ -320,7 +316,7 @@ F 3 "" H 5150 3700 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR06
+L GND-RESCUE-StepperMotorController_12_v2 #PWR06
 U 1 1 551D4012
 P 6400 3000
 F 0 "#PWR06" H 6400 3000 30  0001 C CNN
@@ -709,7 +705,7 @@ Wire Wire Line
 Wire Wire Line
 	4250 3400 4800 3400
 $Comp
-L GND #PWR08
+L GND-RESCUE-StepperMotorController_12_v2 #PWR08
 U 1 1 551EBD74
 P 2700 5200
 F 0 "#PWR08" H 2700 5200 30  0001 C CNN
@@ -725,7 +721,7 @@ NoConn ~ 5500 3600
 NoConn ~ 5500 3700
 NoConn ~ 4800 3200
 $Comp
-L GND #PWR09
+L GND-RESCUE-StepperMotorController_12_v2 #PWR09
 U 1 1 55A283C0
 P 4700 3300
 F 0 "#PWR09" H 4700 3300 30  0001 C CNN
@@ -765,7 +761,7 @@ Wire Wire Line
 Wire Wire Line
 	2500 2850 4250 2850
 $Comp
-L GND #PWR010
+L GND-RESCUE-StepperMotorController_12_v2 #PWR010
 U 1 1 55A2A5A7
 P 1800 3350
 F 0 "#PWR010" H 1800 3350 30  0001 C CNN
@@ -868,7 +864,7 @@ Wire Wire Line
 	1800 1800 2350 1800
 Connection ~ 2350 1800
 $Comp
-L R R4
+L R-RESCUE-StepperMotorController_12_v2 R4
 U 1 1 55CB5CF0
 P 2850 6750
 F 0 "R4" V 2930 6750 40  0000 C CNN
@@ -887,7 +883,7 @@ F 11 "Value" H 2850 6750 60  0001 C CNN "Supplier 2 Part No"
 	1    0    0    -1  
 $EndComp
 $Comp
-L R R2
+L R-RESCUE-StepperMotorController_12_v2 R2
 U 1 1 55CB6599
 P 2850 6000
 F 0 "R2" V 2930 6000 40  0000 C CNN
@@ -906,7 +902,7 @@ F 11 "Value" H 2850 6000 60  0001 C CNN "Supplier 2 Part No"
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR012
+L GND-RESCUE-StepperMotorController_12_v2 #PWR012
 U 1 1 55CB6C0E
 P 2850 7150
 F 0 "#PWR012" H 2850 7150 30  0001 C CNN

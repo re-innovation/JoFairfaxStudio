@@ -29,19 +29,18 @@
  * Defines
  */
 
-<<<<<<< HEAD
 //#define SLAVE_UNIT_ID "00"
 //
 //#define NUMBER_OF_REELS (2)
 
-=======
->>>>>>> origin/master
 #define CMD_RX_PIN (3)
 #define CMD_TX_PIN (4)
 
 /*
  * Private Variables
  */
+static void on_move_complete_1();
+static void on_move_complete_2();
 
 static WordReel s_reels[NUMBER_OF_REELS] = {
 	WordReel(

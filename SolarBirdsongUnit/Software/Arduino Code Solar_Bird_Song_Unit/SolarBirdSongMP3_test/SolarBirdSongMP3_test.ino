@@ -5,8 +5,8 @@
 #include <SoftwareSerial.h>
 #include <EEPROM.h>
 
-#define rxPin 10                             // Software Serial Rx from MP3 Module Tx pin.
-#define txPin 11                            // Software Serial Tx to MP3 Module Rx pin.
+#define rxPin 12                             // Software Serial Rx from MP3 Module Tx pin.
+#define txPin 13                            // Software Serial Tx to MP3 Module Rx pin.
 
 // Define the MP3 Module's Commands that we'll be using
 #define cmdNextTrack  0x01                  // Next track.      
@@ -17,7 +17,7 @@
 #define cmdSetEq      0x07                  // Set Equalizer to a specified value.
 #define cmdReset      0x0c                  // Reset MP3 Module.
 
-#define powerControl  5
+#define powerControl  3
 
 int savedVolume = 0;                        // EEPROM locations for saving current volume 
 int savedEq = 2;                            // and equalizer values.
@@ -119,7 +119,7 @@ void loop() {
    {
     sensorValue = analogRead(tuneBusy);
     delay(10);
-    //Serial.println(sensorValue);
+    Serial.println(sensorValue);
    }    
    Serial.println("Next Track");
 }  

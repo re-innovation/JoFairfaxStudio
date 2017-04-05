@@ -72,7 +72,7 @@
 /*****************************************************/
 
 // This set how many reels will move each time the sensor is triggered
-#define REELS_TO_MOVE_PER_TRIGGER (10)
+#define REELS_TO_MOVE_PER_TRIGGER (12)
 
 // Minimum and maximum distances for triggering the sensor (in cm)
 #define MINIMUM_TRIGGER_DISTANCE_CM (5)
@@ -91,11 +91,7 @@
 #define ECHO_PIN A1
 
 #define NUMBER_OF_MASTER_REELS (2)
-<<<<<<< HEAD
 #define NUMBER_OF_SLAVE_REELS (10)
-=======
-#define NUMBER_OF_SLAVE_REELS (8)
->>>>>>> origin/master
 
 #define NUMBER_OF_REELS_TOTAL (NUMBER_OF_MASTER_REELS + NUMBER_OF_SLAVE_REELS)
 
@@ -110,6 +106,9 @@ static int motor2 = 0; // Holds the ID for Motor 2
 
 static bool s_motors_are_moving = false;
 static unsigned long s_motor_start_time = 0;
+
+static void on_master_move_complete_motor1();
+static void on_master_move_complete_motor2();
 
 // Declare reels on the master unit
 static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
@@ -128,20 +127,7 @@ static WordReel s_reels[NUMBER_OF_MASTER_REELS] = {
     289,                      // Forward steps to centre word at setup
     -20, 0,                // Forward and backward steps to centre word when running
     true,                     // Invert fwd/back movement sense
-<<<<<<< HEAD
-    on_master_move_complete), // Function to call when move is complete
-
-  WordReel(
-    9, 11, 12, 10,
-    A5,
-    1,
-    150, 240,
-    30, 70,
-    false,
-    on_master_move_complete),
-=======
     on_master_move_complete_motor2), // Function to call when move is complete
->>>>>>> origin/master
 };
 static SoftwareSerial s_serial_cmd(CMD_RX_PIN, CMD_TX_PIN);
 
@@ -151,7 +137,6 @@ static SoftwareSerial s_serial_cmd(CMD_RX_PIN, CMD_TX_PIN);
 // Each reel is associated with a two-digit unit ID.
 // This array maps between reels and unit ID
 static char reel_to_unit_id_map[NUMBER_OF_SLAVE_REELS][3] = {
-<<<<<<< HEAD
   "00", // Reel 2 is on slave 00
   "00", // Reel 3 is on slave 00
   "01", // Reel 4 is on slave 00
@@ -162,16 +147,6 @@ static char reel_to_unit_id_map[NUMBER_OF_SLAVE_REELS][3] = {
   "03", // Reel 9 is on slave 00
   "04", // Reel 10 is on slave 00
   "04" // Reel 11 is on slave 00        
-=======
-  "00", // Reel 1 is on slave 00
-  "00",  // Reel 2 is on slave 00
-  "01", // Reel 1 is on slave 01
-  "01",  // Reel 2 is on slave 01
-  "02", // Reel 1 is on slave 02
-  "02",  // Reel 2 is on slave 02
-  "03", // Reel 1 is on slave 03
-  "03",  // Reel 2 is on slave 03
->>>>>>> origin/master
 };
 
 // Each reel is associated with two-digit motor ID.
@@ -185,11 +160,8 @@ static char reel_to_motor_id_map[NUMBER_OF_SLAVE_REELS][3] = {
   "02",  // Slave 02, reel 2
   "01", // Slave 03, reel 1
   "02",  // Slave 04, reel 2
-<<<<<<< HEAD
   "01", // Slave 05, reel 1
   "02"  // Slave 05, reel 2        
-=======
->>>>>>> origin/master
 };
 
 // ********************* END OF USER VARIABLES***************************

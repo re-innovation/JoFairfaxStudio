@@ -28,10 +28,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:matts_components
-LIBS:uln-udn
-LIBS:arduino
-LIBS:w_connectors
 LIBS:StepperMotorController_12_v2-cache
 EELAYER 25 0
 EELAYER END

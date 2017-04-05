@@ -1,4 +1,4 @@
-update=12/08/2015 14:38:22
+update=24/02/2017 09:50:37
 last_client=kicad
 [general]
 version=1
@@ -46,7 +46,7 @@ LibName15=ref-packages
 LibName16=w_connectors
 [eeschema]
 version=1
-LibDir=../../../../../KiCAD/KiCad My Libraries
+LibDir=../../../../../../KiCAD/KiCad My Libraries
 [eeschema/libraries]
 LibName1=StepperMotorController_12_v2-rescue
 LibName2=power
@@ -81,3 +81,13 @@ LibName30=matts_components
 LibName31=uln-udn
 LibName32=arduino
 LibName33=w_connectors
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60

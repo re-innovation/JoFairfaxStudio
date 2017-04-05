@@ -59,13 +59,13 @@
 #include <DFPlayer_Mini_Mp3.h>
 
 // ***** Digital I/O *********
-#define powerControl  6
+#define powerControl  3
 #define pirInterrupt 2
-#define led 13
+#define led 7
 
 // Sound Module Connections
-#define TX 11    // " 12
-#define RX 10   // " 13
+#define TX 13    // " 12
+#define RX 12   // " 13
 
 // Define the MP3 Module's Commands that we'll be using
 #define cmdNextTrack  0x01                  // Next track.      
@@ -146,10 +146,10 @@ void setup()
   
   // Set all other pins to input with pull_up to reduce power consumption
 
-  DDRD &= B01000011;       // set Arduino  as inputs, leaves 0,1 (RX & TX) 2 & 5 as is
-  DDRB = B00000000;        // set pins 8 to 13 as inputs, leaves 10,11 as is
-  PORTD |= B10111100;      // enable pullups on pins 2 to 7, leaves 0,1 (RX & TX) 2 & 5 as is
-  PORTB |= B11111111;      // enable pullups on pins 8 to 13, leaves 10,11 as is
+//  DDRD &= B01000011;       // set Arduino  as inputs, leaves 0,1 (RX & TX) 2 & 5 as is
+//  DDRB = B00000000;        // set pins 8 to 13 as inputs, leaves 10,11 as is
+//  PORTD |= B10111100;      // enable pullups on pins 2 to 7, leaves 0,1 (RX & TX) 2 & 5 as is
+//  PORTB |= B11111111;      // enable pullups on pins 8 to 13, leaves 10,11 as is
   
   // initialize the digital pin as an output.
   // Pin 13 has an LED connected on most Arduino boards:
@@ -171,9 +171,9 @@ void setup()
 
 void loop()
 {
-    Serial.println("Going to sleep...");
-    /* Re-enter sleep mode. */
-    enterSleep();
+//    Serial.println("Going to sleep...");
+//    /* Re-enter sleep mode. */
+//    enterSleep();
   
   // Only if the PIR is activated do we play the tune:
   // This code will just wake up if the PIR is activated
@@ -228,9 +228,9 @@ void loop()
     digitalWrite(powerControl, LOW);
     digitalWrite(led, LOW);             // MP3 module busy signal is active low. 
 
-    //Dont re-trigger until D2 (interrupt) has gone High again....
-    while(digitalRead(2)==LOW)
-    {
-    } 
+//    //Dont re-trigger until D2 (interrupt) has gone High again....
+//    while(digitalRead(2)==LOW)
+//    {
+//    } 
 }
 

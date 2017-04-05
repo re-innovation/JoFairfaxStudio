@@ -28,10 +28,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:matts_components
-LIBS:uln-udn
-LIBS:arduino
-LIBS:w_connectors
 LIBS:StepperMotorController_12_v2-cache
 EELAYER 25 0
 EELAYER END
@@ -84,7 +80,7 @@ STEP_IN4
 Text HLabel 1500 2900 0    60   Input ~ 0
 STEP_V+
 $Comp
-L GND #PWR013
+L GND-RESCUE-StepperMotorController_12_v2 #PWR013
 U 1 1 551AF937
 P 1950 2500
 AR Path="/551AF81E/551AF937" Ref="#PWR013"  Part="1" 
@@ -123,7 +119,7 @@ F 3 "" H 5550 1950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR014
+L GND-RESCUE-StepperMotorController_12_v2 #PWR014
 U 1 1 551AF967
 P 3900 2500
 AR Path="/551AF81E/551AF967" Ref="#PWR014"  Part="1" 
@@ -162,7 +158,7 @@ F 3 "" H 7500 1950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR015
+L GND-RESCUE-StepperMotorController_12_v2 #PWR015
 U 1 1 551AF981
 P 5850 2500
 AR Path="/551AF81E/551AF981" Ref="#PWR015"  Part="1" 
@@ -201,7 +197,7 @@ F 3 "" H 9450 1950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR016
+L GND-RESCUE-StepperMotorController_12_v2 #PWR016
 U 1 1 551AF99B
 P 7800 2500
 AR Path="/551AF81E/551AF99B" Ref="#PWR016"  Part="1" 
@@ -240,7 +236,7 @@ F 3 "" H 3600 3450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR017
+L GND-RESCUE-StepperMotorController_12_v2 #PWR017
 U 1 1 551AF9B5
 P 1950 4000
 AR Path="/551AF81E/551AF9B5" Ref="#PWR017"  Part="1" 
@@ -279,7 +275,7 @@ F 3 "" H 5550 3450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR018
+L GND-RESCUE-StepperMotorController_12_v2 #PWR018
 U 1 1 551AF9CF
 P 3900 4000
 AR Path="/551AF81E/551AF9CF" Ref="#PWR018"  Part="1" 
